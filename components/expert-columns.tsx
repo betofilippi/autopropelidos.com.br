@@ -58,11 +58,11 @@ export function ExpertColumns() {
           <Link key={expert.id} href={`/colunistas/${expert.id}`}>
             <Card className="h-full hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="text-center pb-4">
-                <div className="relative w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                   <img
                     src={"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"}
                     alt={expert.name}
-                    className="absolute inset-0 w-full h-full object-cover rounded-full border-4 border-blue-100 group-hover:border-blue-200 transition-colors"
+                    className="w-full h-full object-cover border-4 border-blue-100 group-hover:border-blue-200 transition-colors rounded-full"
                   />
                 </div>
                 <h3 className="font-bold text-lg group-hover:text-blue-600 transition-colors">{expert.name}</h3>

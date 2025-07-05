@@ -99,7 +99,7 @@ export function NewsGrid() {
         {featuredNews.map((item) => (
           <Link key={item.id} href={item.url}>
             <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden">
-              <div className="h-72 w-full">
+              <div className="relative h-72 w-full">
                 <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300" alt={item.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-0 p-6 text-white">

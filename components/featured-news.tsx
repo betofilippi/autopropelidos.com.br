@@ -67,11 +67,11 @@ export function FeaturedNews() {
         <div className="lg:col-span-2">
           <Link href={`/noticias/${mainNews.id}`}>
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-96 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+              <div className="relative h-96">
                 <img
                   src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400"}
                   alt={mainNews.title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {mainNews.trending && (
@@ -109,11 +109,11 @@ export function FeaturedNews() {
               <Card className="hover:shadow-lg transition-shadow group">
                 <CardContent className="p-0">
                   <div className="flex gap-4">
-                    <div className="relative w-32 h-24 flex-shrink-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+                    <div className="w-32 h-24 flex-shrink-0 overflow-hidden rounded-l-lg">
                       <img
                         src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300"}
                         alt={news.title}
-                        className="absolute inset-0 w-full h-full object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div className="p-4 flex-1">

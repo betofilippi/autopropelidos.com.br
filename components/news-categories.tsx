@@ -75,11 +75,11 @@ export function NewsCategories() {
                   <Link key={item.id} href={`/noticias/${item.id}`}>
                     <Card className="hover:shadow-lg transition-shadow">
                       <CardContent className="p-0">
-                        <div className="relative h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+                        <div className="h-48 w-full">
                           <img
                             src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300"}
                             alt={item.title}
-                            className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
+                            className="w-full h-full object-cover rounded-t-lg"
                           />
                         </div>
                         <div className="p-4">
