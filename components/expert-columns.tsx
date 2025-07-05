@@ -60,7 +60,7 @@ export function ExpertColumns() {
               <CardHeader className="text-center pb-4">
                 <div className="relative w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full">
                   <img
-                    src={expert.avatar || "https://placehold.co/80x80/e5e7eb/9ca3af?text=Expert"}
+                    src={"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"}
                     alt={expert.name}
                     className="absolute inset-0 w-full h-full object-cover rounded-full border-4 border-blue-100 group-hover:border-blue-200 transition-colors"
                   />

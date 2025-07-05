@@ -77,7 +77,7 @@ export function NewsCategories() {
                       <CardContent className="p-0">
                         <div className="relative h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
                           <img
-                            src={item.image || "https://placehold.co/400x300/e5e7eb/9ca3af?text=News+Image"}
+                            src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300"}
                             alt={item.title}
                             className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
                           />
