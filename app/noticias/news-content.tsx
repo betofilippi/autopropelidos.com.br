@@ -125,7 +125,7 @@ export function NewsContent({ initialNews }: NewsContentProps) {
                         <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
                       )}
                       <img
-                        src={item.image_url || 'https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Sem+Imagem'}
+                        src={item.image_url || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Sem+Imagem'}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -135,7 +135,7 @@ export function NewsContent({ initialNews }: NewsContentProps) {
                         }}
                         onError={(e) => {
                           console.log('News image error:', item.image_url)
-                          e.currentTarget.src = 'https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Sem+Imagem'
+                          e.currentTarget.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Sem+Imagem'
                           handleImageError(item.id)
                         }}
                       />
@@ -225,7 +225,7 @@ export function NewsContent({ initialNews }: NewsContentProps) {
                       <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
                     )}
                     <img
-                      src={item.image_url || 'https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Sem+Imagem'}
+                      src={item.image_url || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Sem+Imagem'}
                       alt={item.title}
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -235,7 +235,7 @@ export function NewsContent({ initialNews }: NewsContentProps) {
                       }}
                       onError={(e) => {
                         console.log('News image error:', item.image_url)
-                        e.currentTarget.src = 'https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Sem+Imagem'
+                        e.currentTarget.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Sem+Imagem'
                         handleImageError(item.id)
                       }}
                     />
