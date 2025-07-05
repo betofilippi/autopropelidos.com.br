@@ -2,7 +2,17 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import Image, { ImageProps } from "next/image"
+// import Image, { ImageProps } from "next/image"
+
+interface ImageProps {
+  src?: string
+  alt: string
+  fill?: boolean
+  sizes?: string
+  className?: string
+  width?: number
+  height?: number
+}
 
 interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
   fallbackSrc?: string
@@ -81,20 +91,18 @@ export function OptimizedImage({
         <div className="absolute inset-0 animate-pulse bg-muted" />
       )}
       
-      <Image
-        {...props}
+      <img
+        {...(props as any)}
         src={imageSrc}
         alt={alt}
         className={cn(
           "transition-opacity duration-300",
-          loading ? "opacity-50" : "opacity-100", // Changed from opacity-0 to opacity-50 for visibility
-          props.fill && "object-cover"
+          loading ? "opacity-50" : "opacity-100",
+          props.fill && "absolute inset-0 w-full h-full object-cover"
         )}
         onLoad={handleLoad}
         onError={handleError}
         loading="lazy"
-        placeholder="empty"
-        unoptimized // Add this to bypass Next.js optimization issues
       />
       
       {/* Blur overlay while loading */}

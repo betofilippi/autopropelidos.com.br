@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, ArrowRight, Flame } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 const featuredNews = [
@@ -69,11 +68,10 @@ export function FeaturedNews() {
           <Link href={`/noticias/${mainNews.id}`}>
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
               <div className="relative h-96 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
-                <Image
+                <img
                   src={mainNews.image || "https://via.placeholder.com/600x400/e5e7eb/9ca3af?text=News+Image"}
                   alt={mainNews.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {mainNews.trending && (
@@ -112,11 +110,10 @@ export function FeaturedNews() {
                 <CardContent className="p-0">
                   <div className="flex gap-4">
                     <div className="relative w-32 h-24 flex-shrink-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
-                      <Image
+                      <img
                         src={news.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"}
                         alt={news.title}
-                        fill
-                        className="object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-300"
+                        className="absolute inset-0 w-full h-full object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div className="p-4 flex-1">

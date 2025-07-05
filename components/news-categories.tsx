@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, ArrowRight } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 const categoryNews = {
@@ -77,11 +76,10 @@ export function NewsCategories() {
                     <Card className="hover:shadow-lg transition-shadow">
                       <CardContent className="p-0">
                         <div className="relative h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
-                          <Image
+                          <img
                             src={item.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"}
                             alt={item.title}
-                            fill
-                            className="object-cover rounded-t-lg"
+                            className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
                           />
                         </div>
                         <div className="p-4">
