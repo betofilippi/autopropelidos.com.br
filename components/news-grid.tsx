@@ -101,7 +101,7 @@ export function NewsGrid() {
           <Link key={item.id} href={item.url}>
             <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden">
               <div className="relative h-72 w-full">
-                <Image src={item.image || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
+                <Image src={item.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"} alt={item.title} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-0 p-6 text-white">
                   <Badge className="mb-2 bg-primary hover:bg-primary">{item.category}</Badge>
@@ -125,7 +125,7 @@ export function NewsGrid() {
             <Card className="h-full hover:shadow-lg transition-shadow">
               <CardHeader className="p-0">
                 <div className="relative h-48 w-full">
-                  <Image src={item.image || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
+                  <Image src={item.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"} alt={item.title} fill className="object-cover" />
                 </div>
               </CardHeader>
               <CardContent className="p-4">

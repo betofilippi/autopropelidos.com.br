@@ -141,7 +141,7 @@ export function VideosContent({ initialVideos }: VideosContentProps) {
                       <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
                     )}
                     <img
-                      src={video.thumbnail_url || '/placeholder.svg'}
+                      src={video.thumbnail_url || 'https://via.placeholder.com/480x360/e5e7eb/9ca3af?text=Video+Thumbnail'}
                       alt={video.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                       loading="lazy"
@@ -151,7 +151,7 @@ export function VideosContent({ initialVideos }: VideosContentProps) {
                       }}
                       onError={(e) => {
                         console.log('Video thumbnail error:', video.thumbnail_url)
-                        e.currentTarget.src = '/placeholder.svg'
+                        e.currentTarget.src = 'https://via.placeholder.com/480x360/e5e7eb/9ca3af?text=Video+Thumbnail'
                         handleThumbnailError(video.id)
                       }}
                     />

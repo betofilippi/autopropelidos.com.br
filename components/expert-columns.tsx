@@ -9,7 +9,7 @@ const experts = [
     id: "1",
     name: "Dr. Carlos Mendes",
     title: "Especialista em Mobilidade Urbana",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=Expert",
     article: {
       title: "O Futuro da Mobilidade Urbana no Brasil",
       excerpt:
@@ -22,7 +22,7 @@ const experts = [
     id: "2",
     name: "Eng. Ana Silva",
     title: "Engenheira de Transportes",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=Expert",
     article: {
       title: "Infraestrutura Necessária para Autopropelidos",
       excerpt: "Como as cidades precisam se adaptar para receber a nova geração de veículos elétricos leves",
@@ -34,7 +34,7 @@ const experts = [
     id: "3",
     name: "Adv. Roberto Lima",
     title: "Advogado Especialista em Trânsito",
-    avatar: "/placeholder.svg?height=80&width=80",
+    avatar: "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=Expert",
     article: {
       title: "Aspectos Jurídicos da Resolução 996",
       excerpt: "Interpretação legal das novas regras e seus impactos na responsabilidade civil dos usuários",
@@ -61,7 +61,7 @@ export function ExpertColumns() {
               <CardHeader className="text-center pb-4">
                 <div className="relative w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full">
                   <Image
-                    src={expert.avatar || "/placeholder.svg"}
+                    src={expert.avatar || "https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=Expert"}
                     alt={expert.name}
                     fill
                     className="object-cover rounded-full border-4 border-blue-100 group-hover:border-blue-200 transition-colors"

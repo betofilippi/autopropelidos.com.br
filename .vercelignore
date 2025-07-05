@@ -1,0 +1,24 @@
+# Debug and test files
+*.log
+dev.log
+server.log
+test-server.js
+
+# Supabase temp files
+supabase/.temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files (already in .gitignore but being explicit)
+.env.local
+.env.*.local

@@ -10,7 +10,7 @@ const featuredNews = [
     title: "Resolução 996: Guia Completo das Novas Regras para Autopropelidos",
     excerpt:
       "Análise detalhada de todas as mudanças na regulamentação que afetam usuários de bicicletas elétricas, patinetes e outros equipamentos",
-    image: "/placeholder.svg?height=400&width=600",
+    image: "https://via.placeholder.com/600x400/e5e7eb/9ca3af?text=News+Image",
     category: "Legislação",
     date: "2024-02-25",
     readTime: "12 min",
@@ -21,7 +21,7 @@ const featuredNews = [
     id: "2",
     title: "E-bikes Nacionais vs Importadas: Comparativo Completo 2024",
     excerpt: "Análise técnica e financeira dos principais modelos disponíveis no mercado brasileiro",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
     category: "Comparativos",
     date: "2024-02-24",
     readTime: "8 min",
@@ -30,7 +30,7 @@ const featuredNews = [
     id: "3",
     title: "Segurança em Primeiro Lugar: Equipamentos Obrigatórios",
     excerpt: "Lista atualizada dos EPIs necessários para circular legalmente com equipamentos autopropelidos",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
     category: "Segurança",
     date: "2024-02-23",
     readTime: "6 min",
@@ -39,7 +39,7 @@ const featuredNews = [
     id: "4",
     title: "Baterias de Lítio: Tecnologia e Cuidados Essenciais",
     excerpt: "Como maximizar a vida útil da bateria do seu equipamento autopropelido",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
     category: "Tecnologia",
     date: "2024-02-22",
     readTime: "10 min",
@@ -70,7 +70,7 @@ export function FeaturedNews() {
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
               <div className="relative h-96 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
                 <Image
-                  src={mainNews.image || "/placeholder.svg"}
+                  src={mainNews.image || "https://via.placeholder.com/600x400/e5e7eb/9ca3af?text=News+Image"}
                   alt={mainNews.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -113,7 +113,7 @@ export function FeaturedNews() {
                   <div className="flex gap-4">
                     <div className="relative w-32 h-24 flex-shrink-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
                       <Image
-                        src={news.image || "/placeholder.svg"}
+                        src={news.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"}
                         alt={news.title}
                         fill
                         className="object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-300"

@@ -10,14 +10,14 @@ const categoryNews = {
       id: "leg1",
       title: "Velocidade Máxima de 32km/h: Entenda a Regra",
       excerpt: "Nova regulamentação estabelece limite claro para equipamentos autopropelidos",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-22",
     },
     {
       id: "leg2",
       title: "Documentação Obrigatória: O Que Você Precisa Saber",
       excerpt: "Lista completa dos documentos necessários para circular legalmente",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-21",
     },
   ],
@@ -26,14 +26,14 @@ const categoryNews = {
       id: "seg1",
       title: "Equipamentos de Proteção Individual Obrigatórios",
       excerpt: "Capacete, joelheiras e outros itens essenciais para sua segurança",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-20",
     },
     {
       id: "seg2",
       title: "Dicas de Condução Defensiva para Autopropelidos",
       excerpt: "Como se proteger no trânsito urbano com seu equipamento",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-19",
     },
   ],
@@ -42,14 +42,14 @@ const categoryNews = {
       id: "tech1",
       title: "Baterias de Lítio: Revolução na Autonomia",
       excerpt: "Nova geração de baterias promete até 100km de autonomia",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-18",
     },
     {
       id: "tech2",
       title: "Sistemas de Frenagem Regenerativa",
       excerpt: "Como a tecnologia está aumentando a eficiência dos equipamentos",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image",
       date: "2024-02-17",
     },
   ],
@@ -78,7 +78,7 @@ export function NewsCategories() {
                       <CardContent className="p-0">
                         <div className="relative h-48 w-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
                           <Image
-                            src={item.image || "/placeholder.svg"}
+                            src={item.image || "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=News+Image"}
                             alt={item.title}
                             fill
                             className="object-cover rounded-t-lg"

@@ -15,7 +15,7 @@ interface OptimizedImageProps extends Omit<ImageProps, 'onLoad' | 'onError'> {
 export function OptimizedImage({
   src,
   alt,
-  fallbackSrc = "/placeholder.svg",
+  fallbackSrc = "https://via.placeholder.com/400x300/e5e7eb/9ca3af?text=Image",
   showSkeleton = true,
   aspectRatio,
   className,
