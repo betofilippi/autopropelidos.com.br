@@ -241,7 +241,7 @@ export default function Resolucao996() {
                         <h4 className="font-medium text-green-600 mb-2">Permitido:</h4>
                         <ul className="space-y-1 text-sm">
                           <li>• Ciclofaixas e ciclovias</li>
-                          <li>• Vias urbanas locais (< 60 km/h)</li>
+                          <li>• Vias urbanas locais (&lt; 60 km/h)</li>
                           <li>• Área de circulação de pedestres*</li>
                         </ul>
                       </div>
@@ -249,7 +249,7 @@ export default function Resolucao996() {
                         <h4 className="font-medium text-red-600 mb-2">Proibido:</h4>
                         <ul className="space-y-1 text-sm">
                           <li>• Rodovias e vias expressas</li>
-                          <li>• Vias com velocidade > 60 km/h</li>
+                          <li>• Vias com velocidade &gt; 60 km/h</li>
                           <li>• Calçadas (exceto onde permitido)</li>
                         </ul>
                       </div>

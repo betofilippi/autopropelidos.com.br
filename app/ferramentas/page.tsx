@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Search, CheckCircle, FileText, Map, AlertTriangle } from "lucide-react"
+import { Calculator, Search, CheckCircle, FileText, Map, Shield, AlertTriangle } from "lucide-react"
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -84,14 +84,14 @@ const tools = [
     id: 'safety-checklist',
     title: 'Checklist de Segurança',
     description: 'Lista de verificação completa para circular com segurança',
-    icon: <AlertTriangle className="h-8 w-8" />,
+    icon: <Shield className="h-8 w-8" />,
     color: 'bg-red-100 text-red-600 border-red-200',
     href: '/ferramentas/checklist-seguranca',
     features: [
-      'Equipamentos obrigatórios',
-      'Manutenção preventiva',
-      'Boas práticas no trânsito',
-      'Situações de emergência'
+      'Verificação pré-uso diária',
+      'Manutenção semanal e mensal',
+      'Equipamentos de segurança',
+      'Contatos de emergência'
     ]
   }
 ]

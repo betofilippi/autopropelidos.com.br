@@ -2,9 +2,10 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { Navbar } from "@/components/navigation/navbar"
-import { Footer } from "@/components/navigation/footer"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
 import { ThemeProvider } from "@/components/providers"
+import { ImageDebugToolbar } from "@/components/image-debug-toolbar"
 import { Analytics } from "@vercel/analytics/react"
 import { Suspense } from "react"
 
@@ -41,10 +42,10 @@ export const metadata: Metadata = {
   },
 }
 
-function NavbarWithSuspense() {
+function HeaderWithSuspense() {
   return (
     <Suspense fallback={<div className="h-16 bg-background border-b" />}>
-      <Navbar />
+      <Header />
     </Suspense>
   )
 }
@@ -59,10 +60,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="min-h-screen flex flex-col">
-            <NavbarWithSuspense />
+            <HeaderWithSuspense />
             <main className="flex-grow">{children}</main>
             <Footer />
           </div>
+          <ImageDebugToolbar />
           <Analytics />
         </ThemeProvider>
       </body>

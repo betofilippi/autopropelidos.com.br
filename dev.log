@@ -1,0 +1,64 @@
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.2.4
+   - Local:        http://localhost:3000
+   - Network:      http://10.255.255.254:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 21.6s
+ ○ Compiling / ...
+ ⨯ ./app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @tailwind base;
+| @tailwind components;
+| @tailwind utilities;
+
+Import trace for requested module:
+./app/globals.css
+./app/layout.tsx
+ ⨯ ./app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @tailwind base;
+| @tailwind components;
+| @tailwind utilities;
+
+Import trace for requested module:
+./app/globals.css
+./app/layout.tsx
+ ✓ Compiled /_not-found in 760ms (482 modules)
+ ✓ Compiled in 1130ms (482 modules)
+ ✓ Compiled in 1321ms (482 modules)
+ ✓ Compiled in 585ms (482 modules)
+ ○ Compiling /_error ...
+ ⨯ ./app/globals.css
+Module parse failed: Unexpected character '@' (1:0)
+> @tailwind base;
+| @tailwind components;
+| @tailwind utilities;
+
+Import trace for requested module:
+./app/globals.css
+./app/layout.tsx
+ GET / 500 in 47556ms
+ ✓ Compiled /_error in 1055ms (724 modules)
+ ✓ Compiled in 706ms (724 modules)
+ ✓ Compiled in 853ms (724 modules)
+ ✓ Compiled in 937ms (724 modules)
+ ✓ Compiled in 760ms (724 modules)
+ ✓ Compiled in 663ms (724 modules)
+ ✓ Compiled in 498ms (724 modules)
+ ✓ Compiled in 504ms (724 modules)
+ ✓ Compiled in 736ms (724 modules)
+ ✓ Compiled in 749ms (724 modules)
+ ✓ Compiled in 703ms (724 modules)
+ ✓ Compiled in 693ms (724 modules)
+ ✓ Compiled in 688ms (724 modules)
+ ✓ Compiled in 793ms (724 modules)
+ ✓ Compiled in 609ms (724 modules)
+ ✓ Compiled in 628ms (724 modules)
+ ✓ Compiled in 624ms (724 modules)
+ ✓ Compiled in 755ms (724 modules)
+ ✓ Compiled in 709ms (724 modules)
+ ✓ Compiled in 624ms (724 modules)
+ ✓ Compiled in 593ms (724 modules)
+[?25h

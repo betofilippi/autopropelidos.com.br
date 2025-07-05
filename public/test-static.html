@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Estático de Imagens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 3px solid #000;
+            background-color: white;
+        }
+        img {
+            border: 3px solid red;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 TESTE ESTÁTICO DE IMAGENS</h1>
+    <p><strong>Esta é uma página HTML estática para testar se as imagens carregam.</strong></p>
+    
+    <div class="test-container">
+        <h2>Teste 1: placeholder.svg (Local)</h2>
+        <img src="/placeholder.svg" alt="Placeholder SVG" width="200" height="150" 
+             onload="alert('✅ SVG LOCAL carregou!');" 
+             onerror="alert('❌ Erro no SVG LOCAL');">
+    </div>
+    
+    <div class="test-container">
+        <h2>Teste 2: Imagem externa</h2>
+        <img src="https://via.placeholder.com/200x150/FF0000/FFFFFF?text=EXTERNO" 
+             alt="External image" width="200" height="150"
+             onload="alert('✅ Imagem EXTERNA carregou!');" 
+             onerror="alert('❌ Erro na imagem EXTERNA');">
+    </div>
+    
+    <div class="test-container">
+        <h2>Teste 3: placeholder.jpg (Local)</h2>
+        <img src="/placeholder.jpg" alt="Placeholder JPG" width="200" height="150"
+             onload="alert('✅ JPG LOCAL carregou!');" 
+             onerror="alert('❌ Erro no JPG LOCAL');">
+    </div>
+    
+    <div class="test-container">
+        <h2>Status do Servidor</h2>
+        <p>Se você está vendo esta página, o servidor está funcionando.</p>
+        <p>Se as imagens aparecem VISUALMENTE nas caixas vermelhas acima, então o problema estava no React/Next.js.</p>
+        <p>Se você recebe alertas popup, as imagens estão carregando corretamente.</p>
+    </div>
+    
+    <script>
+        console.log('🔍 Página estática carregada');
+        console.log('🔍 Testando acesso direto às imagens...');
+        
+        // Test fetch API
+        fetch('/placeholder.svg')
+            .then(response => {
+                console.log('✅ Fetch /placeholder.svg:', response.status);
+                if (response.ok) {
+                    alert('✅ Fetch do SVG funcionou: ' + response.status);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Fetch error:', error);
+                alert('❌ Fetch falhou: ' + error.message);
+            });
+    </script>
+</body>
+</html>
