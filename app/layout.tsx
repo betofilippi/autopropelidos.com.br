@@ -4,7 +4,6 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/navigation/navbar"
 import { Footer } from "@/components/navigation/footer"
-import { ThemeProvider } from "@/components/providers"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "@/components/ui/toaster"
 import { SkipLinks } from "@/components/ui/skip-links"
@@ -42,11 +41,8 @@ export const metadata: Metadata = {
   generator: 'Next.js',
   applicationName: 'Portal Autopropelidos',
   referrer: 'origin-when-cross-origin',
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
-  ],
+  colorScheme: 'light',
+  themeColor: '#2563eb',
   viewport: {
     width: 'device-width',
     initialScale: 1,
@@ -235,47 +231,29 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} ${inter.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {/* Skip Links for keyboard navigation */}
-          <SkipLinks />
-          
-          <div className="min-h-screen flex flex-col">
-            <header id="navigation">
-              <NavbarWithSuspense />
-            </header>
-            
-            <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
-              {children}
-            </main>
-            
-            <div id="footer">
-              <Footer />
-            </div>
-          </div>
-          
-          <Toaster />
-          <Analytics />
-          
-          {/* Live region for dynamic announcements */}
-          <div id="live-region" aria-live="polite" aria-atomic="true" className="sr-only"></div>
-        </ThemeProvider>
+        {/* Skip Links for keyboard navigation */}
+        <SkipLinks />
         
-        {/* Load non-critical scripts */}
-        <Script
-          id="theme-script"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark')
-                } else {
-                  document.documentElement.classList.remove('dark')
-                }
-              } catch (_) {}
-            `
-          }}
-        />
+        <div className="min-h-screen flex flex-col">
+          <header id="navigation">
+            <NavbarWithSuspense />
+          </header>
+          
+          <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
+            {children}
+          </main>
+          
+          <div id="footer">
+            <Footer />
+          </div>
+        </div>
+        
+        <Toaster />
+        <Analytics />
+        
+        {/* Live region for dynamic announcements */}
+        <div id="live-region" aria-live="polite" aria-atomic="true" className="sr-only"></div>
+        
         
         {/* Schema.org Organization markup */}
         <script

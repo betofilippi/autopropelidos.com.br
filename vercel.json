@@ -1,0 +1,34 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync/news",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/sync/videos",
+      "schedule": "0 */12 * * *"
+    },
+    {
+      "path": "/api/sync/trending",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/sync/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ],
+  "functions": {
+    "app/api/sync/news/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/sync/videos/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/sync/trending/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/sync/cleanup/route.ts": {
+      "maxDuration": 120
+    }
+  }
+}

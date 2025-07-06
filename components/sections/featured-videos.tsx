@@ -25,12 +25,12 @@ interface FeaturedVideosProps {
 export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'news_report': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'educational': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      case 'analysis': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-      case 'review': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'tutorial': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+      case 'news_report': return 'category-regulation'
+      case 'educational': return 'category-technology'
+      case 'analysis': return 'category-urban_mobility'
+      case 'review': return 'category-safety'
+      case 'tutorial': return 'category-safety'
+      default: return 'category-general'
     }
   }
 
@@ -56,7 +56,7 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
 
   return (
     <section 
-      className="py-16 bg-gray-50 dark:bg-gray-900"
+      className="py-16 bg-white"
       aria-labelledby="featured-videos-heading"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,11 +64,11 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
           <div>
             <h2 
               id="featured-videos-heading"
-              className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
+              className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl portal-title"
             >
               Vídeos em Destaque
             </h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+            <p className="mt-4 text-lg text-gray-600 portal-subtitle">
               Conteúdo audiovisual de qualidade sobre autopropelidos
             </p>
           </div>
@@ -146,11 +146,11 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
               </CardHeader>
 
               <CardContent className="pt-0">
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                   {video.description}
                 </p>
                 
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center justify-between text-xs text-gray-500">
                   <span className="font-medium">{video.channel_name}</span>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
@@ -188,7 +188,7 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
             role="status"
             aria-live="polite"
           >
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500">
               Nenhum vídeo encontrado. Verifique novamente em breve.
             </p>
           </div>

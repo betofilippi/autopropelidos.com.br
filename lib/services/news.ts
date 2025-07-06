@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { cacheManager } from '@/lib/utils/cache'
 import { newsLogger } from '@/lib/utils/logger'
 import { quickSearch } from '@/lib/utils/search'
+import { deduplicateNews, rankContent } from '@/lib/utils/deduplication'
+import { monitoring } from '@/lib/utils/monitoring'
 import type { SearchFilters, PaginationOptions, SearchResult, NewsItem } from '@/lib/types/services'
 
 const NEWS_API_KEY = process.env.NEWS_API_KEY!
@@ -67,49 +69,127 @@ export async function fetchNewsFromAPI(
   }
 }
 
-export async function aggregateNews() {
-  const supabase = await createClient()
-  const allArticles: NewsAPIArticle[] = []
-
-  // Buscar notícias para cada palavra-chave
-  for (const keyword of KEYWORDS) {
-    const newsData = await fetchNewsFromAPI(keyword, 1, 10)
-    if (newsData && newsData.articles) {
-      allArticles.push(...newsData.articles)
-    }
+export async function aggregateNews(): Promise<{ success: boolean; processed: number; errors: string[] }> {
+  const startTime = Date.now()
+  const errors: string[] = []
+  let processed = 0
+  
+  if (!NEWS_API_KEY) {
+    const error = 'NEWS_API_KEY not configured'
+    newsLogger.error('AGGREGATE_NEWS', error)
+    return { success: false, processed: 0, errors: [error] }
   }
 
-  // Filtrar duplicatas por URL
-  const uniqueArticles = Array.from(
-    new Map(allArticles.map(article => [article.url, article])).values()
-  )
+  try {
+    const supabase = await createClient()
+    const allArticles: NewsAPIArticle[] = []
 
-  // Categorizar e salvar no banco
-  for (const article of uniqueArticles) {
-    const category = categorizeArticle(article)
-    const relevanceScore = calculateRelevance(article)
-    
-    // Verificar se a notícia já existe
-    const { data: existing } = await supabase
-      .from('news')
-      .select('id')
-      .eq('url', article.url)
-      .single()
-
-    if (!existing) {
-      await supabase.from('news').insert({
-        title: article.title,
-        description: article.description,
-        content: article.content,
-        url: article.url,
-        source: article.source.name,
-        published_at: article.publishedAt,
-        category,
-        tags: extractTags(article),
-        image_url: article.urlToImage,
-        relevance_score: relevanceScore
-      })
+    // Buscar notícias para cada palavra-chave
+    for (const keyword of KEYWORDS) {
+      try {
+        const newsData = await fetchNewsFromAPI(keyword, 1, 10)
+        if (newsData && newsData.articles) {
+          allArticles.push(...newsData.articles)
+          newsLogger.info('AGGREGATE_NEWS', `Fetched ${newsData.articles.length} articles for keyword: ${keyword}`)
+        }
+      } catch (error) {
+        const errorMsg = `Error fetching news for keyword ${keyword}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errors.push(errorMsg)
+        newsLogger.error('AGGREGATE_NEWS', errorMsg)
+        monitoring.recordApiError('news', errorMsg, keyword)
+      }
     }
+
+    // Converter para NewsItem format para deduplicação
+    const newsItems: NewsItem[] = allArticles.map(article => ({
+      id: article.url, // Usar URL como ID temporário
+      title: article.title,
+      description: article.description,
+      content: article.content,
+      url: article.url,
+      source: article.source.name,
+      published_at: article.publishedAt,
+      category: categorizeArticle(article),
+      tags: extractTags(article),
+      image_url: article.urlToImage,
+      relevance_score: calculateRelevance(article)
+    }))
+
+    // Aplicar deduplicação avançada
+    const { unique: uniqueArticles, duplicates } = deduplicateNews(newsItems)
+    
+    newsLogger.info('AGGREGATE_NEWS', `Deduplication results: ${allArticles.length} original, ${uniqueArticles.length} unique, ${duplicates.length} duplicates removed`)
+
+    // Aplicar ranking de qualidade
+    const rankedArticles = rankContent(uniqueArticles)
+
+    // Salvar artigos únicos e ranqueados no banco
+    for (const article of rankedArticles) {
+      try {
+        // Verificar se a notícia já existe
+        const { data: existing } = await supabase
+          .from('news')
+          .select('id')
+          .eq('url', article.url)
+          .single()
+
+        if (!existing) {
+          const { error } = await supabase.from('news').insert({
+            title: article.title,
+            description: article.description,
+            content: article.content,
+            url: article.url,
+            source: article.source,
+            published_at: article.published_at,
+            category: article.category,
+            tags: article.tags,
+            image_url: article.image_url,
+            relevance_score: article.relevance_score,
+            quality_score: (article as any).quality_score || 0
+          })
+          
+          if (error) {
+            throw error
+          }
+          
+          processed++
+          newsLogger.info('AGGREGATE_NEWS', `Saved article: ${article.title}`)
+        }
+      } catch (error) {
+        const errorMsg = `Error saving article ${article.title}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errors.push(errorMsg)
+        newsLogger.error('AGGREGATE_NEWS', errorMsg)
+      }
+    }
+
+    const duration = Date.now() - startTime
+    const success = errors.length === 0
+    
+    // Registrar métricas de monitoramento
+    if (success) {
+      monitoring.recordSyncSuccess('news', duration, processed)
+    } else {
+      monitoring.recordSyncFailure('news', `${errors.length} errors occurred`)
+    }
+    
+    monitoring.recordResponseTime('news_aggregation', duration)
+    
+    newsLogger.info('AGGREGATE_NEWS', `Aggregation completed`, {
+      processed,
+      total_articles: allArticles.length,
+      unique_articles: rankedArticles.length,
+      duplicates_removed: duplicates.length,
+      errors: errors.length,
+      duration_ms: duration,
+      success
+    })
+
+    return { success, processed, errors }
+  } catch (error) {
+    const errorMsg = `Critical error in aggregateNews: ${error instanceof Error ? error.message : 'Unknown error'}`
+    errors.push(errorMsg)
+    newsLogger.error('AGGREGATE_NEWS', errorMsg)
+    return { success: false, processed, errors }
   }
 }
 
@@ -192,7 +272,45 @@ export async function getLatestNews(
   const startTime = Date.now()
   
   try {
-    // Mock data for development - replace with database call when Supabase is configured
+    // Tenta buscar do banco de dados primeiro (API real)
+    if (NEWS_API_KEY) {
+      try {
+        const supabase = await createClient()
+        let query = supabase
+          .from('news')
+          .select('*')
+          .order('published_at', { ascending: false })
+          .limit(limit)
+
+        if (category && category !== 'all') {
+          query = query.eq('category', category)
+        }
+
+        const { data, error } = await query
+
+        if (!error && data && data.length > 0) {
+          // Cache os dados reais
+          cacheManager.news.set(cacheKey, data, 1800) // 30 minutos
+          
+          const duration = Date.now() - startTime
+          newsLogger.info('GET_LATEST_NEWS', `Retrieved ${data.length} news items from database`, {
+            category,
+            limit,
+            duration_ms: duration,
+            cached: false,
+            source: 'database'
+          })
+          
+          return data
+        }
+      } catch (dbError) {
+        newsLogger.error('GET_LATEST_NEWS', 'Database error, falling back to mock data', {
+          error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+        })
+      }
+    }
+    
+    // Fallback para mock data se não houver API key ou dados no banco
     const mockNews: NewsItem[] = [
     {
       id: '1',
@@ -472,11 +590,12 @@ export async function getLatestNews(
     
     // Log da operação
     const duration = Date.now() - startTime
-    newsLogger.info('GET_LATEST_NEWS', `Retrieved ${result.length} news items`, {
+    newsLogger.info('GET_LATEST_NEWS', `Retrieved ${result.length} news items (fallback)`, {
       category,
       limit,
       duration_ms: duration,
-      cached: false
+      cached: false,
+      source: 'mock'
     })
     
     return result

@@ -87,82 +87,136 @@ export async function getVideoDetails(videoIds: string[]): Promise<any> {
   }
 }
 
-export async function aggregateYouTubeVideos() {
-  const supabase = await createClient()
-  const allVideos: YouTubeVideo[] = []
-
-  // Buscar vídeos para cada termo
-  for (const query of SEARCH_QUERIES) {
-    const searchData = await searchYouTubeVideos(query, 5)
-    if (searchData && searchData.items) {
-      allVideos.push(...searchData.items)
-    }
+export async function aggregateYouTubeVideos(): Promise<{ success: boolean; processed: number; errors: string[] }> {
+  const startTime = Date.now()
+  const errors: string[] = []
+  let processed = 0
+  
+  if (!YOUTUBE_API_KEY) {
+    const error = 'YOUTUBE_API_KEY not configured'
+    console.error('AGGREGATE_YOUTUBE', error)
+    return { success: false, processed: 0, errors: [error] }
   }
 
-  // Buscar vídeos de canais confiáveis
-  for (const channelId of TRUSTED_CHANNELS) {
-    const channelQuery = `patinete elétrico OR bicicleta elétrica OR mobilidade urbana`
-    const params = new URLSearchParams({
-      part: 'snippet',
-      channelId: channelId,
-      q: channelQuery,
-      type: 'video',
-      maxResults: '5',
-      order: 'date',
-      key: YOUTUBE_API_KEY
+  try {
+    const supabase = await createClient()
+    const allVideos: YouTubeVideo[] = []
+
+    // Buscar vídeos para cada termo
+    for (const query of SEARCH_QUERIES) {
+      try {
+        const searchData = await searchYouTubeVideos(query, 5)
+        if (searchData && searchData.items) {
+          allVideos.push(...searchData.items)
+          console.log(`Fetched ${searchData.items.length} videos for query: ${query}`)
+        }
+      } catch (error) {
+        const errorMsg = `Error fetching videos for query ${query}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errors.push(errorMsg)
+        console.error('AGGREGATE_YOUTUBE', errorMsg)
+      }
+    }
+
+    // Buscar vídeos de canais confiáveis
+    for (const channelId of TRUSTED_CHANNELS) {
+      try {
+        const channelQuery = `patinete elétrico OR bicicleta elétrica OR mobilidade urbana`
+        const params = new URLSearchParams({
+          part: 'snippet',
+          channelId: channelId,
+          q: channelQuery,
+          type: 'video',
+          maxResults: '5',
+          order: 'date',
+          key: YOUTUBE_API_KEY
+        })
+
+        const response = await fetch(`${YOUTUBE_API_BASE_URL}/search?${params}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.items) {
+            allVideos.push(...data.items)
+            console.log(`Fetched ${data.items.length} videos from channel: ${channelId}`)
+          }
+        }
+      } catch (error) {
+        const errorMsg = `Error fetching videos from channel ${channelId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errors.push(errorMsg)
+        console.error('AGGREGATE_YOUTUBE', errorMsg)
+      }
+    }
+
+    // Filtrar duplicatas
+    const uniqueVideos = Array.from(
+      new Map(allVideos.map(video => [video.id.videoId, video])).values()
+    )
+
+    // Obter detalhes adicionais dos vídeos
+    const videoIds = uniqueVideos.map(v => v.id.videoId)
+    const videoDetails = await getVideoDetails(videoIds)
+    
+    // Salvar no banco
+    for (const video of uniqueVideos) {
+      try {
+        const details = videoDetails?.items?.find((d: any) => d.id === video.id.videoId)
+        const category = categorizeVideo(video)
+        const relevanceScore = calculateVideoRelevance(video)
+        
+        // Verificar se o vídeo já existe
+        const { data: existing } = await supabase
+          .from('videos')
+          .select('id')
+          .eq('youtube_id', video.id.videoId)
+          .single()
+
+        if (!existing) {
+          const { error } = await supabase.from('videos').insert({
+            youtube_id: video.id.videoId,
+            title: video.snippet.title,
+            description: video.snippet.description,
+            channel_name: video.snippet.channelTitle,
+            channel_id: video.snippet.channelId,
+            thumbnail_url: video.snippet.thumbnails.high?.url || video.snippet.thumbnails.medium?.url,
+            published_at: video.snippet.publishedAt,
+            duration: details?.contentDetails?.duration,
+            view_count: details?.statistics?.viewCount ? parseInt(details.statistics.viewCount) : null,
+            category,
+            tags: video.snippet.tags || [],
+            relevance_score: relevanceScore
+          })
+          
+          if (error) {
+            throw error
+          }
+          
+          processed++
+          console.log(`Saved video: ${video.snippet.title}`)
+        }
+      } catch (error) {
+        const errorMsg = `Error saving video ${video.snippet.title}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        errors.push(errorMsg)
+        console.error('AGGREGATE_YOUTUBE', errorMsg)
+      }
+    }
+
+    const duration = Date.now() - startTime
+    const success = errors.length === 0
+    
+    console.log('AGGREGATE_YOUTUBE', `Aggregation completed`, {
+      processed,
+      total_videos: allVideos.length,
+      unique_videos: uniqueVideos.length,
+      errors: errors.length,
+      duration_ms: duration,
+      success
     })
 
-    try {
-      const response = await fetch(`${YOUTUBE_API_BASE_URL}/search?${params}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.items) {
-          allVideos.push(...data.items)
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching videos from channel ${channelId}:`, error)
-    }
-  }
-
-  // Filtrar duplicatas
-  const uniqueVideos = Array.from(
-    new Map(allVideos.map(video => [video.id.videoId, video])).values()
-  )
-
-  // Obter detalhes adicionais dos vídeos
-  const videoIds = uniqueVideos.map(v => v.id.videoId)
-  const videoDetails = await getVideoDetails(videoIds)
-  
-  // Salvar no banco
-  for (const video of uniqueVideos) {
-    const details = videoDetails?.items?.find((d: any) => d.id === video.id.videoId)
-    const category = categorizeVideo(video)
-    const relevanceScore = calculateVideoRelevance(video)
-    
-    // Verificar se o vídeo já existe
-    const { data: existing } = await supabase
-      .from('videos')
-      .select('id')
-      .eq('youtube_id', video.id.videoId)
-      .single()
-
-    if (!existing) {
-      await supabase.from('videos').insert({
-        youtube_id: video.id.videoId,
-        title: video.snippet.title,
-        description: video.snippet.description,
-        channel_name: video.snippet.channelTitle,
-        channel_id: video.snippet.channelId,
-        thumbnail_url: video.snippet.thumbnails.high.url,
-        published_at: video.snippet.publishedAt,
-        duration: details?.contentDetails?.duration,
-        view_count: details?.statistics?.viewCount ? parseInt(details.statistics.viewCount) : null,
-        category,
-        tags: video.snippet.tags || [],
-        relevance_score: relevanceScore
-      })
-    }
+    return { success, processed, errors }
+  } catch (error) {
+    const errorMsg = `Critical error in aggregateYouTubeVideos: ${error instanceof Error ? error.message : 'Unknown error'}`
+    errors.push(errorMsg)
+    console.error('AGGREGATE_YOUTUBE', errorMsg)
+    return { success: false, processed, errors }
   }
 }
 
@@ -216,7 +270,31 @@ export async function getLatestVideos(
   category?: string,
   limit: number = 10
 ) {
-  // Mock data for development - replace with database call when Supabase is configured
+  // Tenta buscar do banco de dados primeiro (API real)
+  if (YOUTUBE_API_KEY) {
+    try {
+      const supabase = await createClient()
+      let query = supabase
+        .from('videos')
+        .select('*')
+        .order('published_at', { ascending: false })
+        .limit(limit)
+
+      if (category && category !== 'all') {
+        query = query.eq('category', category)
+      }
+
+      const { data, error } = await query
+
+      if (!error && data && data.length > 0) {
+        return data
+      }
+    } catch (dbError) {
+      console.error('Database error, falling back to mock data:', dbError)
+    }
+  }
+  
+  // Fallback para mock data se não houver API key ou dados no banco
   const mockVideos = [
     {
       id: '1',
