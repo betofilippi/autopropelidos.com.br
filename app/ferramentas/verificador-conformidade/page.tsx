@@ -62,7 +62,7 @@ export default function VerificadorConformidade() {
                     com os limites estabelecidos pela Resolução 996 do CONTRAN.
                   </p>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <strong>Limites para equipamentos autopropelidos:</strong> Velocidade ≤ 32 km/h • Potência ≤ 1.500W • Largura ≤ 70cm
+                    <strong>Limites para equipamentos autopropelidos:</strong> Velocidade ≤ 32 km/h • Potência ≤ 1.000W • Largura ≤ 70cm
                   </div>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function VerificadorConformidade() {
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg">
                   <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
                   <div className="font-medium">Potência</div>
-                  <div className="text-sm text-gray-600">350W ≤ 1.500W</div>
+                  <div className="text-sm text-gray-600">350W ≤ 1.000W</div>
                   <Badge variant="outline" className="mt-2 bg-green-100 text-green-800 border-green-200">
                     Conforme
                   </Badge>

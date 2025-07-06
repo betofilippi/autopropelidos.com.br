@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Search, CheckCircle, FileText, Map, Shield, AlertTriangle } from "lucide-react"
+import { Calculator, Search, CheckCircle, FileText, Map, Shield, AlertTriangle, Scale } from "lucide-react"
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -92,6 +92,20 @@ const tools = [
       'Manutenção semanal e mensal',
       'Equipamentos de segurança',
       'Contatos de emergência'
+    ]
+  },
+  {
+    id: 'inspection-checkup',
+    title: 'Checkup de Fiscalização',
+    description: 'Ferramenta para autoridades verificarem conformidade com a Resolução 996',
+    icon: <Scale className="h-8 w-8" />,
+    color: 'bg-amber-100 text-amber-600 border-amber-200',
+    href: '/ferramentas/checkup-fiscalizacao',
+    features: [
+      'Exclusivo para autoridades',
+      'Verificação técnica completa',
+      'Relatório oficial de fiscalização',
+      'Baseado na Resolução 996/2023'
     ]
   }
 ]

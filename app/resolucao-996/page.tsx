@@ -97,7 +97,7 @@ export default function Resolucao996() {
                         </li>
                         <li className="flex items-center">
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          Potência máxima de 1.500W
+                          Potência máxima de 1.000W
                         </li>
                         <li className="flex items-center">
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
@@ -120,11 +120,11 @@ export default function Resolucao996() {
                         </li>
                         <li className="flex items-center">
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          Potência máxima de 350W
+                          Potência máxima de 1.000W
                         </li>
                         <li className="flex items-center">
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          Velocidade limitada a 25 km/h
+                          Velocidade limitada a 32 km/h
                         </li>
                       </ul>
                     </div>
@@ -184,7 +184,7 @@ export default function Resolucao996() {
                         </li>
                         <li className="flex items-center">
                           <AlertTriangle className="h-4 w-4 text-orange-500 mr-2" />
-                          Potência superior a 1.500W
+                          Potência superior a 1.000W
                         </li>
                         <li className="flex items-center">
                           <AlertTriangle className="h-4 w-4 text-orange-500 mr-2" />
