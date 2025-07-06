@@ -55,11 +55,17 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
   }
 
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900">
+    <section 
+      className="py-16 bg-gray-50 dark:bg-gray-900"
+      aria-labelledby="featured-videos-heading"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+            <h2 
+              id="featured-videos-heading"
+              className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl"
+            >
               Vídeos em Destaque
             </h2>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
@@ -67,23 +73,37 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
             </p>
           </div>
           <Link href="/videos">
-            <Button variant="outline" className="gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              aria-label="Ver todos os vídeos"
+            >
               Ver todos
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div 
+          className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4"
+          role="list"
+          aria-label="Lista de vídeos em destaque"
+        >
           {videos.map((video) => (
-            <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+            <Card 
+              key={video.id} 
+              className="overflow-hidden hover:shadow-lg transition-shadow group focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+              asArticle
+              role="listitem"
+            >
               <div className="relative">
                 <div className="relative h-48 bg-black">
                   <Image
                     src={video.thumbnail_url}
-                    alt={video.title}
+                    alt={`Thumbnail do vídeo: ${video.title}`}
                     fill
                     className="object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -91,17 +111,21 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
                       href={`https://youtube.com/watch?v=${video.youtube_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`Assistir vídeo: ${video.title} no YouTube (abre em nova aba)`}
                     >
                       <Button 
                         size="lg" 
-                        className="rounded-full bg-red-600 hover:bg-red-700 text-white gap-2"
+                        className="rounded-full bg-red-600 hover:bg-red-700 text-white gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-red-600"
                       >
-                        <Play className="h-5 w-5 fill-current" />
+                        <Play className="h-5 w-5 fill-current" aria-hidden="true" />
                         Assistir
                       </Button>
                     </Link>
                   </div>
-                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                  <div 
+                    className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded"
+                    aria-label={`Duração: ${video.duration}`}
+                  >
                     {video.duration}
                   </div>
                 </div>
@@ -109,11 +133,14 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
               
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge className={getCategoryColor(video.category)}>
+                  <Badge 
+                    className={getCategoryColor(video.category)}
+                    aria-label={`Categoria: ${getCategoryLabel(video.category)}`}
+                  >
                     {getCategoryLabel(video.category)}
                   </Badge>
                 </div>
-                <CardTitle className="text-base line-clamp-2">
+                <CardTitle className="text-base line-clamp-2" level={3}>
                   {video.title}
                 </CardTitle>
               </CardHeader>
@@ -127,15 +154,26 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
                   <span className="font-medium">{video.channel_name}</span>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      {formatViewCount(video.view_count)}
+                      <Eye className="h-3 w-3" aria-hidden="true" />
+                      <span aria-label={`${video.view_count} visualizações`}>
+                        {formatViewCount(video.view_count)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(video.published_at).toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: '2-digit' 
-                      })}
+                      <Calendar className="h-3 w-3" aria-hidden="true" />
+                      <time 
+                        dateTime={video.published_at}
+                        aria-label={`Publicado em ${new Date(video.published_at).toLocaleDateString('pt-BR', { 
+                          day: 'numeric', 
+                          month: 'long',
+                          year: 'numeric'
+                        })}`}
+                      >
+                        {new Date(video.published_at).toLocaleDateString('pt-BR', { 
+                          day: '2-digit', 
+                          month: '2-digit' 
+                        })}
+                      </time>
                     </div>
                   </div>
                 </div>
@@ -145,7 +183,11 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
         </div>
 
         {videos.length === 0 && (
-          <div className="text-center py-12">
+          <div 
+            className="text-center py-12"
+            role="status"
+            aria-live="polite"
+          >
             <p className="text-gray-500 dark:text-gray-400">
               Nenhum vídeo encontrado. Verifique novamente em breve.
             </p>

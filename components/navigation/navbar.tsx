@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Menu, X, ChevronDown } from "lucide-react"
@@ -65,14 +65,51 @@ const navigationItems = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null)
+  const navRef = useRef<HTMLElement>(null)
+
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [mobileMenuOpen])
+
+  // Focus management for mobile menu
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      // Focus first menu item when opened
+      const firstMenuItem = navRef.current?.querySelector('a[href], button')
+      if (firstMenuItem) {
+        ;(firstMenuItem as HTMLElement).focus()
+      }
+    }
+  }, [mobileMenuOpen])
+
+  const toggleSubmenu = (title: string) => {
+    setExpandedSubmenu(expandedSubmenu === title ? null : title)
+  }
 
   return (
-    <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+    <nav 
+      ref={navRef}
+      className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50"
+      role="navigation"
+      aria-label="Navegação principal"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
+            <Link 
+              href="/" 
+              className="flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-1"
+              aria-label="AutoPropelidos - Ir para página inicial"
+            >
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 AutoPropelidos
               </span>
@@ -90,18 +127,33 @@ export function Navbar() {
                   <NavigationMenuItem key={item.title}>
                     {item.children ? (
                       <>
-                        <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+                        <NavigationMenuTrigger 
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                          className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                          {item.title}
+                        </NavigationMenuTrigger>
                         <NavigationMenuContent>
-                          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                          <ul 
+                            className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2"
+                            role="menu"
+                            aria-label={`Submenu ${item.title}`}
+                          >
                             {item.children.map((child) => (
-                              <li key={child.title}>
+                              <li key={child.title} role="none">
                                 <NavigationMenuLink asChild>
                                   <Link
                                     href={child.href}
-                                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:ring-2 focus:ring-blue-500"
+                                    role="menuitem"
+                                    aria-describedby={`${child.title.replace(/\s+/g, '')}-desc`}
                                   >
                                     <div className="text-sm font-medium leading-none">{child.title}</div>
-                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                    <p 
+                                      id={`${child.title.replace(/\s+/g, '')}-desc`}
+                                      className="line-clamp-2 text-sm leading-snug text-muted-foreground"
+                                    >
                                       {child.description}
                                     </p>
                                   </Link>
@@ -113,7 +165,10 @@ export function Navbar() {
                       </>
                     ) : (
                       <Link href={item.href} legacyBehavior passHref>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink 
+                          className={navigationMenuTriggerStyle()}
+                          aria-current={item.href === "/" ? "page" : undefined}
+                        >
                           {item.title}
                         </NavigationMenuLink>
                       </Link>
@@ -127,7 +182,10 @@ export function Navbar() {
           {/* CTA Button */}
           <div className="hidden lg:block">
             <Link href="/ferramentas/verificador-conformidade">
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Verificar conformidade do seu equipamento"
+              >
                 Verificar Conformidade
               </Button>
             </Link>
@@ -138,12 +196,17 @@ export function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
             >
-              <span className="sr-only">Abrir menu</span>
+              <span className="sr-only">
+                {mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+              </span>
               {mobileMenuOpen ? (
-                <X className="block h-6 w-6" />
+                <X className="block h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="block h-6 w-6" />
+                <Menu className="block h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -151,25 +214,53 @@ export function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:hidden`}>
+      <div 
+        id="mobile-menu"
+        className={`${mobileMenuOpen ? 'block' : 'hidden'} lg:hidden`}
+        role="menu"
+        aria-label="Menu de navegação móvel"
+      >
         <div className="px-2 pt-2 pb-3 space-y-1">
           {navigationItems.map((item) => (
             <div key={item.title}>
               {item.children ? (
                 <div className="space-y-1">
-                  <button className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-between">
+                  <button 
+                    className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-50 flex items-center justify-between"
+                    onClick={() => toggleSubmenu(item.title)}
+                    aria-expanded={expandedSubmenu === item.title}
+                    aria-controls={`submenu-${item.title.replace(/\s+/g, '')}`}
+                    aria-label={`${item.title} - ${expandedSubmenu === item.title ? 'Fechar' : 'Abrir'} submenu`}
+                    role="menuitem"
+                  >
                     {item.title}
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown 
+                      className={`h-4 w-4 transition-transform ${expandedSubmenu === item.title ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    />
                   </button>
-                  <div className="pl-4 space-y-1">
+                  <div 
+                    id={`submenu-${item.title.replace(/\s+/g, '')}`}
+                    className={`pl-4 space-y-1 ${expandedSubmenu === item.title ? 'block' : 'hidden'}`}
+                    role="menu"
+                    aria-label={`Submenu ${item.title}`}
+                  >
                     {item.children.map((child) => (
                       <Link
                         key={child.title}
                         href={child.href}
-                        className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        className="block px-3 py-2 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-50"
                         onClick={() => setMobileMenuOpen(false)}
+                        role="menuitem"
+                        aria-describedby={`${child.title.replace(/\s+/g, '')}-mobile-desc`}
                       >
-                        {child.title}
+                        <div className="font-medium">{child.title}</div>
+                        <div 
+                          id={`${child.title.replace(/\s+/g, '')}-mobile-desc`}
+                          className="text-xs text-gray-500 mt-1"
+                        >
+                          {child.description}
+                        </div>
                       </Link>
                     ))}
                   </div>
@@ -177,8 +268,10 @@ export function Navbar() {
               ) : (
                 <Link
                   href={item.href}
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-50"
                   onClick={() => setMobileMenuOpen(false)}
+                  role="menuitem"
+                  aria-current={item.href === "/" ? "page" : undefined}
                 >
                   {item.title}
                 </Link>
@@ -187,7 +280,10 @@ export function Navbar() {
           ))}
           <div className="mt-4 px-3">
             <Link href="/ferramentas/verificador-conformidade" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="Verificar conformidade do seu equipamento"
+              >
                 Verificar Conformidade
               </Button>
             </Link>

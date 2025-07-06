@@ -7,6 +7,7 @@ import { Footer } from "@/components/navigation/footer"
 import { ThemeProvider } from "@/components/providers"
 import { Analytics } from "@vercel/analytics/react"
 import { Toaster } from "@/components/ui/toaster"
+import { SkipLinks } from "@/components/ui/skip-links"
 import { Suspense } from "react"
 import Script from "next/script"
 
@@ -235,22 +236,28 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} ${inter.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {/* Skip Links for keyboard navigation */}
+          <SkipLinks />
+          
           <div className="min-h-screen flex flex-col">
-            <a 
-              href="#main-content" 
-              className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-primary text-primary-foreground p-2 z-50"
-              aria-label="Pular para o conteúdo principal"
-            >
-              Pular para o conteúdo principal
-            </a>
-            <NavbarWithSuspense />
-            <main id="main-content" className="flex-grow" tabIndex={-1}>
+            <header id="navigation">
+              <NavbarWithSuspense />
+            </header>
+            
+            <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
               {children}
             </main>
-            <Footer />
+            
+            <div id="footer">
+              <Footer />
+            </div>
           </div>
+          
           <Toaster />
           <Analytics />
+          
+          {/* Live region for dynamic announcements */}
+          <div id="live-region" aria-live="polite" aria-atomic="true" className="sr-only"></div>
         </ThemeProvider>
         
         {/* Load non-critical scripts */}

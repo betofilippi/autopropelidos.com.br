@@ -4,24 +4,29 @@ import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
+  React.HTMLAttributes<HTMLDivElement> & {
+    asArticle?: boolean
+  }
+>(({ className, asArticle = false, ...props }, ref) => {
+  const Component = asArticle ? "article" : "div"
+  return (
+    <Component
+      ref={ref}
+      className={cn(
+        "rounded-lg border bg-card text-card-foreground shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
+  <header
     ref={ref}
     className={cn("flex flex-col space-y-1.5 p-6", className)}
     {...props}
@@ -30,18 +35,23 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement> & {
+    level?: 1 | 2 | 3 | 4 | 5 | 6
+  }
+>(({ className, level = 3, ...props }, ref) => {
+  const Component = `h${level}` as keyof JSX.IntrinsicElements
+  return (
+    <Component
+      ref={ref}
+      className={cn(
+        "text-2xl font-semibold leading-none tracking-tight",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
