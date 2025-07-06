@@ -1,512 +1,838 @@
-import { cacheManager } from '@/lib/utils/cache'
-import { analyticsLogger } from '@/lib/utils/logger'
-import type { AnalyticsData, NewsItem, VideoItem } from '@/lib/types/services'
-import { getLatestNews, getNewsStats } from './news'
-import { getLatestVideos } from './youtube'
-import { getVehicleStats } from './vehicles'
-import { getRegulationStats } from './regulations'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { CacheService } from '@/lib/services/cache'
 
-// Função para gerar dados mock de analytics
-function generateMockAnalytics(): AnalyticsData {
-  const now = new Date()
-  const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  
-  return {
-    period,
-    metrics: {
-      total_visits: Math.floor(Math.random() * 50000) + 25000,
-      unique_visitors: Math.floor(Math.random() * 30000) + 15000,
-      page_views: Math.floor(Math.random() * 150000) + 75000,
-      bounce_rate: Math.random() * 0.3 + 0.25, // 25% - 55%
-      average_session_duration: Math.floor(Math.random() * 300) + 120, // 2-7 minutos
-      top_pages: [
-        {
-          path: '/resolucao-996',
-          views: Math.floor(Math.random() * 15000) + 8000,
-          unique_views: Math.floor(Math.random() * 10000) + 5000
-        },
-        {
-          path: '/ferramentas/verificador-conformidade',
-          views: Math.floor(Math.random() * 12000) + 6000,
-          unique_views: Math.floor(Math.random() * 8000) + 4000
-        },
-        {
-          path: '/noticias',
-          views: Math.floor(Math.random() * 10000) + 5000,
-          unique_views: Math.floor(Math.random() * 7000) + 3500
-        },
-        {
-          path: '/videos',
-          views: Math.floor(Math.random() * 8000) + 4000,
-          unique_views: Math.floor(Math.random() * 6000) + 3000
-        },
-        {
-          path: '/veiculos',
-          views: Math.floor(Math.random() * 7000) + 3500,
-          unique_views: Math.floor(Math.random() * 5000) + 2500
-        },
-        {
-          path: '/ferramentas',
-          views: Math.floor(Math.random() * 6000) + 3000,
-          unique_views: Math.floor(Math.random() * 4000) + 2000
-        },
-        {
-          path: '/regulamentacoes',
-          views: Math.floor(Math.random() * 5000) + 2500,
-          unique_views: Math.floor(Math.random() * 3500) + 1750
-        }
+interface AnalyticsData {
+  views: number
+  uniqueViews: number
+  duration: number
+  bounceRate: number
+  source: string
+  device: string
+  location: string
+  timestamp: Date
+}
+
+interface TrendingScore {
+  contentId: string
+  contentType: 'news' | 'video'
+  score: number
+  factors: {
+    views: number
+    velocity: number
+    engagement: number
+    recency: number
+    relevance: number
+    social: number
+    predicted: number
+  }
+  rank: number
+  category: string
+  timestamp: Date
+}
+
+interface PredictionModel {
+  features: number[]
+  weights: number[]
+  bias: number
+  accuracy: number
+  lastTrained: Date
+}
+
+interface MLFeatures {
+  viewCount: number
+  viewVelocity: number
+  engagementRate: number
+  timeOnPage: number
+  shareCount: number
+  commentCount: number
+  recencyScore: number
+  relevanceScore: number
+  seasonalityScore: number
+  categoryPopularity: number
+  authorCredibility: number
+  keywordTrending: number
+}
+
+export class AnalyticsService {
+  private cacheService = new CacheService()
+  private trendingModel: PredictionModel = this.initializeModel()
+  private readonly TRENDING_CACHE_KEY = 'trending_scores'
+  private readonly ANALYTICS_CACHE_KEY = 'analytics_data'
+
+  constructor() {
+    this.startModelTraining()
+  }
+
+  private initializeModel(): PredictionModel {
+    // Initialize with basic weights - these would be learned from training
+    return {
+      features: [],
+      weights: [
+        0.25, // viewCount
+        0.20, // viewVelocity
+        0.15, // engagementRate
+        0.10, // timeOnPage
+        0.08, // shareCount
+        0.07, // commentCount
+        0.15, // recencyScore
+        0.12, // relevanceScore
+        0.05, // seasonalityScore
+        0.08, // categoryPopularity
+        0.06, // authorCredibility
+        0.09  // keywordTrending
       ],
-      top_search_terms: [
-        {
-          term: 'contran 996',
-          count: Math.floor(Math.random() * 3000) + 1500
-        },
-        {
-          term: 'patinete elétrico',
-          count: Math.floor(Math.random() * 2500) + 1200
-        },
-        {
-          term: 'bicicleta elétrica',
-          count: Math.floor(Math.random() * 2000) + 1000
-        },
-        {
-          term: 'ciclomotor',
-          count: Math.floor(Math.random() * 1500) + 800
-        },
-        {
-          term: 'mobilidade urbana',
-          count: Math.floor(Math.random() * 1200) + 600
-        },
-        {
-          term: 'segurança trânsito',
-          count: Math.floor(Math.random() * 1000) + 500
-        },
-        {
-          term: 'lei patinete',
-          count: Math.floor(Math.random() * 800) + 400
-        },
-        {
-          term: 'capacete obrigatório',
-          count: Math.floor(Math.random() * 600) + 300
-        },
-        {
-          term: 'multa patinete',
-          count: Math.floor(Math.random() * 500) + 250
-        },
-        {
-          term: 'documentação ciclomotor',
-          count: Math.floor(Math.random() * 400) + 200
-        }
-      ],
-      user_demographics: {
-        age_groups: {
-          '18-24': Math.floor(Math.random() * 8000) + 4000,
-          '25-34': Math.floor(Math.random() * 12000) + 8000,
-          '35-44': Math.floor(Math.random() * 10000) + 6000,
-          '45-54': Math.floor(Math.random() * 6000) + 3000,
-          '55-64': Math.floor(Math.random() * 3000) + 1500,
-          '65+': Math.floor(Math.random() * 1000) + 500
-        },
-        regions: {
-          'São Paulo': Math.floor(Math.random() * 15000) + 10000,
-          'Rio de Janeiro': Math.floor(Math.random() * 8000) + 5000,
-          'Minas Gerais': Math.floor(Math.random() * 6000) + 3000,
-          'Paraná': Math.floor(Math.random() * 4000) + 2000,
-          'Rio Grande do Sul': Math.floor(Math.random() * 3500) + 1750,
-          'Santa Catarina': Math.floor(Math.random() * 3000) + 1500,
-          'Bahia': Math.floor(Math.random() * 2500) + 1250,
-          'Distrito Federal': Math.floor(Math.random() * 2000) + 1000,
-          'Goiás': Math.floor(Math.random() * 1500) + 750,
-          'Outros': Math.floor(Math.random() * 3000) + 1500
-        },
-        devices: {
-          'Desktop': Math.floor(Math.random() * 15000) + 8000,
-          'Mobile': Math.floor(Math.random() * 20000) + 15000,
-          'Tablet': Math.floor(Math.random() * 5000) + 2000
-        }
-      },
-      content_performance: {
-        most_viewed_news: [],
-        most_watched_videos: [],
-        popular_categories: {
-          'regulation': Math.floor(Math.random() * 10000) + 8000,
-          'safety': Math.floor(Math.random() * 8000) + 6000,
-          'urban_mobility': Math.floor(Math.random() * 7000) + 5000,
-          'technology': Math.floor(Math.random() * 5000) + 3000,
-          'general': Math.floor(Math.random() * 3000) + 1500
-        }
-      }
+      bias: 0.1,
+      accuracy: 0.75,
+      lastTrained: new Date()
     }
   }
-}
 
-export async function getAnalytics(period?: string): Promise<AnalyticsData> {
-  const cacheKey = `analytics:${period || 'current'}`
-  
-  const cached = cacheManager.analytics.get<AnalyticsData>(cacheKey)
-  if (cached) {
-    analyticsLogger.cacheHit(cacheKey)
-    return cached
-  }
-  
-  analyticsLogger.cacheMiss(cacheKey)
-  const startTime = Date.now()
-  
-  try {
-    // Gera dados mock de analytics
-    const analyticsData = generateMockAnalytics()
-    
-    // Busca conteúdo real para completar os dados
-    const [latestNews, latestVideos] = await Promise.all([
-      getLatestNews('all', 5),
-      getLatestVideos('all', 5)
-    ])
-    
-    // Adiciona conteúdo real aos dados de performance
-    analyticsData.metrics.content_performance.most_viewed_news = latestNews
-    analyticsData.metrics.content_performance.most_watched_videos = latestVideos
-    
-    // Salva no cache por 15 minutos
-    cacheManager.analytics.set(cacheKey, analyticsData, 900)
-    
-    const duration = Date.now() - startTime
-    analyticsLogger.info('GET_ANALYTICS', `Generated analytics data for period ${period || 'current'}`, {
-      period: period || 'current',
-      total_visits: analyticsData.metrics.total_visits,
-      unique_visitors: analyticsData.metrics.unique_visitors,
-      duration_ms: duration,
-      cached: false
-    })
-    
-    return analyticsData
-  } catch (error) {
-    analyticsLogger.error('GET_ANALYTICS', 'Error generating analytics data', {
-      period: period || 'current',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
-    throw error
-  }
-}
+  private startModelTraining() {
+    // Retrain model every 6 hours
+    setInterval(async () => {
+      await this.trainTrendingModel()
+    }, 6 * 60 * 60 * 1000)
 
-export async function getTrafficStats(): Promise<{
-  daily_visits: Array<{ date: string; visits: number; unique_visitors: number }>
-  hourly_distribution: Array<{ hour: number; visits: number }>
-  referral_sources: Array<{ source: string; visits: number; percentage: number }>
-  search_engines: Array<{ engine: string; visits: number; percentage: number }>
-}> {
-  const cacheKey = 'traffic:stats'
-  
-  const cached = cacheManager.analytics.get<any>(cacheKey)
-  if (cached) {
-    analyticsLogger.cacheHit(cacheKey)
-    return cached
+    // Initial training after startup
+    setTimeout(() => {
+      this.trainTrendingModel()
+    }, 60000) // 1 minute after startup
   }
-  
-  analyticsLogger.cacheMiss(cacheKey)
-  const startTime = Date.now()
-  
-  try {
-    // Gera dados mock de tráfego para os últimos 30 dias
-    const dailyVisits = []
+
+  // Real-time trending calculation
+  async calculateTrendingScores(): Promise<TrendingScore[]> {
+    const cached = await this.cacheService.get<TrendingScore[]>(this.TRENDING_CACHE_KEY)
+    if (cached) return cached
+
+    const supabase = createAdminClient()
+    const scores: TrendingScore[] = []
+
+    // Get recent content (last 7 days)
+    const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
+    // Process news articles
+    const { data: news } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('news')
+      .select('*')
+      .gte('published_at', cutoffDate.toISOString())
+      .order('published_at', { ascending: false })
+
+    for (const article of news || []) {
+      const features = await this.extractMLFeatures(article, 'news')
+      const score = this.predictTrendingScore(features)
+      
+      scores.push({
+        contentId: article.id,
+        contentType: 'news',
+        score,
+        factors: {
+          views: features.viewCount,
+          velocity: features.viewVelocity,
+          engagement: features.engagementRate,
+          recency: features.recencyScore,
+          relevance: features.relevanceScore,
+          social: features.shareCount + features.commentCount,
+          predicted: score
+        },
+        rank: 0, // Will be set after sorting
+        category: article.category,
+        timestamp: new Date()
+      })
+    }
+
+    // Process videos
+    const { data: videos } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('videos')
+      .select('*')
+      .gte('published_at', cutoffDate.toISOString())
+      .order('published_at', { ascending: false })
+
+    for (const video of videos || []) {
+      const features = await this.extractMLFeatures(video, 'video')
+      const score = this.predictTrendingScore(features)
+      
+      scores.push({
+        contentId: video.id,
+        contentType: 'video',
+        score,
+        factors: {
+          views: features.viewCount,
+          velocity: features.viewVelocity,
+          engagement: features.engagementRate,
+          recency: features.recencyScore,
+          relevance: features.relevanceScore,
+          social: features.shareCount + features.commentCount,
+          predicted: score
+        },
+        rank: 0,
+        category: video.category,
+        timestamp: new Date()
+      })
+    }
+
+    // Sort by score and assign ranks
+    scores.sort((a, b) => b.score - a.score)
+    scores.forEach((score, index) => {
+      score.rank = index + 1
+    })
+
+    // Cache for 5 minutes
+    await this.cacheService.set(this.TRENDING_CACHE_KEY, scores, { ttl: 300 })
+
+    return scores
+  }
+
+  private async extractMLFeatures(content: any, type: 'news' | 'video'): Promise<MLFeatures> {
+    const supabase = createAdminClient()
     const now = new Date()
-    
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
-      
-      dailyVisits.push({
-        date: date.toISOString().split('T')[0],
-        visits: Math.floor(Math.random() * 3000) + 1000,
-        unique_visitors: Math.floor(Math.random() * 2000) + 700
-      })
-    }
-    
-    // Distribuição por hora (0-23)
-    const hourlyDistribution = []
-    for (let hour = 0; hour < 24; hour++) {
-      let baseVisits = 100
-      
-      // Picos de tráfego em horários comerciais
-      if (hour >= 8 && hour <= 11) baseVisits = 300 // Manhã
-      if (hour >= 13 && hour <= 17) baseVisits = 400 // Tarde
-      if (hour >= 19 && hour <= 22) baseVisits = 250 // Noite
-      
-      hourlyDistribution.push({
-        hour,
-        visits: baseVisits + Math.floor(Math.random() * 100)
-      })
-    }
-    
-    const totalReferralVisits = Math.floor(Math.random() * 10000) + 5000
-    
-    const referralSources = [
-      { source: 'Google Orgânico', visits: Math.floor(totalReferralVisits * 0.45) },
-      { source: 'Direto', visits: Math.floor(totalReferralVisits * 0.25) },
-      { source: 'Facebook', visits: Math.floor(totalReferralVisits * 0.08) },
-      { source: 'YouTube', visits: Math.floor(totalReferralVisits * 0.06) },
-      { source: 'Instagram', visits: Math.floor(totalReferralVisits * 0.05) },
-      { source: 'LinkedIn', visits: Math.floor(totalReferralVisits * 0.04) },
-      { source: 'WhatsApp', visits: Math.floor(totalReferralVisits * 0.03) },
-      { source: 'Outros', visits: Math.floor(totalReferralVisits * 0.04) }
-    ].map(item => ({
-      ...item,
-      percentage: (item.visits / totalReferralVisits) * 100
-    }))
-    
-    const searchEngines = [
-      { engine: 'Google', visits: Math.floor(totalReferralVisits * 0.85) },
-      { engine: 'Bing', visits: Math.floor(totalReferralVisits * 0.08) },
-      { engine: 'Yahoo', visits: Math.floor(totalReferralVisits * 0.04) },
-      { engine: 'DuckDuckGo', visits: Math.floor(totalReferralVisits * 0.02) },
-      { engine: 'Outros', visits: Math.floor(totalReferralVisits * 0.01) }
-    ].map(item => ({
-      ...item,
-      percentage: (item.visits / totalReferralVisits) * 100
-    }))
-    
-    const trafficStats = {
-      daily_visits: dailyVisits,
-      hourly_distribution: hourlyDistribution,
-      referral_sources: referralSources,
-      search_engines: searchEngines
-    }
-    
-    cacheManager.analytics.set(cacheKey, trafficStats, 1800) // 30 minutos
-    
-    const duration = Date.now() - startTime
-    analyticsLogger.info('GET_TRAFFIC_STATS', `Generated traffic statistics`, {
-      days: dailyVisits.length,
-      total_referral_visits: totalReferralVisits,
-      duration_ms: duration,
-      cached: false
-    })
-    
-    return trafficStats
-  } catch (error) {
-    analyticsLogger.error('GET_TRAFFIC_STATS', 'Error generating traffic statistics', {
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
-    throw error
-  }
-}
+    const publishedAt = new Date(content.published_at)
+    const ageInHours = (now.getTime() - publishedAt.getTime()) / (1000 * 60 * 60)
 
-export async function getContentAnalytics(): Promise<{
-  news: {
-    total_views: number
-    most_viewed: NewsItem[]
-    engagement_rate: number
-    avg_time_on_page: number
+    // Get analytics data for this content
+    const { data: analytics } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('*')
+      .eq('content_id', content.id)
+      .eq('content_type', type)
+
+    const totalViews = analytics?.reduce((sum, a) => sum + a.views, 0) || 0
+    const uniqueViews = analytics?.reduce((sum, a) => sum + a.unique_views, 0) || 0
+    const totalDuration = analytics?.reduce((sum, a) => sum + a.duration, 0) || 0
+    const avgDuration = analytics?.length ? totalDuration / analytics.length : 0
+
+    // Calculate view velocity (views per hour)
+    const viewVelocity = ageInHours > 0 ? totalViews / ageInHours : 0
+
+    // Calculate engagement rate
+    const engagementRate = totalViews > 0 ? (uniqueViews / totalViews) * 100 : 0
+
+    // Get social metrics
+    const { data: socialMetrics } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('social_metrics')
+      .select('*')
+      .eq('content_id', content.id)
+      .single()
+
+    // Calculate recency score (decays over time)
+    const recencyScore = Math.exp(-ageInHours / 24) * 100
+
+    // Calculate relevance score based on keywords and tags
+    const relevanceScore = this.calculateRelevanceScore(content)
+
+    // Calculate seasonality score
+    const seasonalityScore = this.calculateSeasonalityScore(content, now)
+
+    // Get category popularity
+    const categoryPopularity = await this.getCategoryPopularity(content.category)
+
+    // Calculate author credibility (for news)
+    const authorCredibility = type === 'news' ? 
+      await this.calculateAuthorCredibility(content.source) : 50
+
+    // Calculate keyword trending score
+    const keywordTrending = await this.calculateKeywordTrendingScore(content)
+
+    return {
+      viewCount: totalViews,
+      viewVelocity,
+      engagementRate,
+      timeOnPage: avgDuration,
+      shareCount: socialMetrics?.shares || 0,
+      commentCount: socialMetrics?.comments || 0,
+      recencyScore,
+      relevanceScore,
+      seasonalityScore,
+      categoryPopularity,
+      authorCredibility,
+      keywordTrending
+    }
   }
-  videos: {
-    total_views: number
-    most_watched: VideoItem[]
-    engagement_rate: number
-    avg_watch_time: number
+
+  private predictTrendingScore(features: MLFeatures): number {
+    const featureVector = [
+      this.normalizeFeature(features.viewCount, 0, 10000),
+      this.normalizeFeature(features.viewVelocity, 0, 1000),
+      this.normalizeFeature(features.engagementRate, 0, 100),
+      this.normalizeFeature(features.timeOnPage, 0, 600),
+      this.normalizeFeature(features.shareCount, 0, 1000),
+      this.normalizeFeature(features.commentCount, 0, 500),
+      this.normalizeFeature(features.recencyScore, 0, 100),
+      this.normalizeFeature(features.relevanceScore, 0, 100),
+      this.normalizeFeature(features.seasonalityScore, 0, 100),
+      this.normalizeFeature(features.categoryPopularity, 0, 100),
+      this.normalizeFeature(features.authorCredibility, 0, 100),
+      this.normalizeFeature(features.keywordTrending, 0, 100)
+    ]
+
+    // Linear regression prediction
+    let score = this.trendingModel.bias
+    for (let i = 0; i < featureVector.length; i++) {
+      score += featureVector[i] * this.trendingModel.weights[i]
+    }
+
+    // Apply sigmoid activation to get score between 0 and 100
+    return (1 / (1 + Math.exp(-score))) * 100
   }
-  searches: {
-    total_searches: number
-    top_terms: Array<{ term: string; count: number }>
-    zero_results: number
-    avg_results_per_search: number
+
+  private normalizeFeature(value: number, min: number, max: number): number {
+    return Math.min(Math.max((value - min) / (max - min), 0), 1)
   }
-}> {
-  const cacheKey = 'content:analytics'
-  
-  const cached = cacheManager.analytics.get<any>(cacheKey)
-  if (cached) {
-    analyticsLogger.cacheHit(cacheKey)
-    return cached
-  }
-  
-  analyticsLogger.cacheMiss(cacheKey)
-  const startTime = Date.now()
-  
-  try {
-    const [latestNews, latestVideos, newsStats] = await Promise.all([
-      getLatestNews('all', 10),
-      getLatestVideos('all', 10),
-      getNewsStats()
-    ])
+
+  private calculateRelevanceScore(content: any): number {
+    let score = 50 // Base score
+    const text = `${content.title} ${content.description || content.content || ''}`.toLowerCase()
     
-    const contentAnalytics = {
-      news: {
-        total_views: Math.floor(Math.random() * 100000) + 50000,
-        most_viewed: latestNews.slice(0, 5),
-        engagement_rate: Math.random() * 0.3 + 0.6, // 60-90%
-        avg_time_on_page: Math.floor(Math.random() * 180) + 120 // 2-5 minutos
-      },
-      videos: {
-        total_views: Math.floor(Math.random() * 80000) + 40000,
-        most_watched: latestVideos.slice(0, 5),
-        engagement_rate: Math.random() * 0.25 + 0.65, // 65-90%
-        avg_watch_time: Math.floor(Math.random() * 300) + 180 // 3-8 minutos
-      },
-      searches: {
-        total_searches: Math.floor(Math.random() * 20000) + 10000,
-        top_terms: [
-          { term: 'contran 996', count: Math.floor(Math.random() * 2000) + 1000 },
-          { term: 'patinete elétrico', count: Math.floor(Math.random() * 1500) + 800 },
-          { term: 'bicicleta elétrica', count: Math.floor(Math.random() * 1200) + 600 },
-          { term: 'ciclomotor', count: Math.floor(Math.random() * 1000) + 500 },
-          { term: 'mobilidade urbana', count: Math.floor(Math.random() * 800) + 400 },
-          { term: 'segurança', count: Math.floor(Math.random() * 600) + 300 },
-          { term: 'regulamentação', count: Math.floor(Math.random() * 500) + 250 },
-          { term: 'capacete', count: Math.floor(Math.random() * 400) + 200 }
-        ],
-        zero_results: Math.floor(Math.random() * 500) + 100,
-        avg_results_per_search: Math.random() * 10 + 5 // 5-15 resultados
+    // High-priority keywords
+    const highPriorityKeywords = ['contran', '996', 'regulamentação', 'lei federal', 'segurança']
+    const mediumPriorityKeywords = ['patinete', 'bicicleta', 'elétrico', 'mobilidade', 'urbana']
+    const lowPriorityKeywords = ['trânsito', 'fiscalização', 'multa', 'norma']
+    
+    highPriorityKeywords.forEach(keyword => {
+      if (text.includes(keyword)) score += 15
+    })
+    
+    mediumPriorityKeywords.forEach(keyword => {
+      if (text.includes(keyword)) score += 10
+    })
+    
+    lowPriorityKeywords.forEach(keyword => {
+      if (text.includes(keyword)) score += 5
+    })
+    
+    return Math.min(score, 100)
+  }
+
+  private calculateSeasonalityScore(content: any, now: Date): number {
+    const month = now.getMonth()
+    const dayOfWeek = now.getDay()
+    const hour = now.getHours()
+    
+    let score = 50 // Base score
+    
+    // Seasonal patterns for mobility content
+    if (month >= 3 && month <= 9) { // Spring/Summer
+      score += 20 // Higher interest in mobility during warmer months
+    }
+    
+    // Weekly patterns
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Weekdays
+      score += 15 // Higher engagement on weekdays
+    }
+    
+    // Daily patterns
+    if (hour >= 7 && hour <= 9) { // Morning rush
+      score += 10
+    } else if (hour >= 17 && hour <= 19) { // Evening rush
+      score += 10
+    }
+    
+    return Math.min(score, 100)
+  }
+
+  private async getCategoryPopularity(category: string): Promise<number> {
+    const supabase = createAdminClient()
+    const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    
+    // Get view count for this category in the last week
+    const { data: categoryViews } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('views')
+      .eq('category', category)
+      .gte('timestamp', cutoffDate.toISOString())
+    
+    const totalViews = categoryViews?.reduce((sum, item) => sum + item.views, 0) || 0
+    
+    // Normalize to 0-100 scale
+    return Math.min((totalViews / 1000) * 100, 100)
+  }
+
+  private async calculateAuthorCredibility(source: string): Promise<number> {
+    const supabase = createAdminClient()
+    
+    // Get historical performance of this source
+    const { data: sourcePerformance } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('news')
+      .select('relevance_score, view_count')
+      .eq('source', source)
+      .limit(10)
+    
+    if (!sourcePerformance || sourcePerformance.length === 0) return 50
+    
+    const avgRelevance = sourcePerformance.reduce((sum, item) => sum + item.relevance_score, 0) / sourcePerformance.length
+    const avgViews = sourcePerformance.reduce((sum, item) => sum + (item.view_count || 0), 0) / sourcePerformance.length
+    
+    // Combine relevance and popularity
+    return Math.min((avgRelevance + (avgViews / 100)) / 2, 100)
+  }
+
+  private async calculateKeywordTrendingScore(content: any): Promise<number> {
+    const supabase = createAdminClient()
+    const keywords = content.tags || []
+    
+    if (keywords.length === 0) return 50
+    
+    let totalScore = 0
+    let keywordCount = 0
+    
+    for (const keyword of keywords) {
+      // Get recent mentions of this keyword
+      const { data: keywordMentions } = await supabase
+        .schema('autopropelidos.com.br')
+        .from('keyword_trends')
+        .select('mentions, trend_score')
+        .eq('keyword', keyword)
+        .order('timestamp', { ascending: false })
+        .limit(1)
+      
+      if (keywordMentions && keywordMentions.length > 0) {
+        totalScore += keywordMentions[0].trend_score
+        keywordCount++
       }
     }
     
-    cacheManager.analytics.set(cacheKey, contentAnalytics, 1800)
-    
-    const duration = Date.now() - startTime
-    analyticsLogger.info('GET_CONTENT_ANALYTICS', `Generated content analytics`, {
-      news_total_views: contentAnalytics.news.total_views,
-      videos_total_views: contentAnalytics.videos.total_views,
-      total_searches: contentAnalytics.searches.total_searches,
-      duration_ms: duration,
-      cached: false
-    })
-    
-    return contentAnalytics
-  } catch (error) {
-    analyticsLogger.error('GET_CONTENT_ANALYTICS', 'Error generating content analytics', {
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
-    throw error
+    return keywordCount > 0 ? totalScore / keywordCount : 50
   }
-}
 
-export async function getDashboardSummary(): Promise<{
-  overview: {
-    total_visitors_today: number
-    total_page_views_today: number
-    avg_session_duration: number
-    bounce_rate: number
-    growth_visitors: number // % de crescimento
-    growth_page_views: number // % de crescimento
-  }
-  content_stats: {
-    total_news: number
-    total_videos: number
-    total_vehicles: number
-    total_regulations: number
-  }
-  recent_activity: Array<{
-    type: 'news' | 'video' | 'search' | 'visit'
-    description: string
-    timestamp: string
-    value?: number
-  }>
-  alerts: Array<{
-    type: 'info' | 'warning' | 'error' | 'success'
-    message: string
-    timestamp: string
-  }>
-}> {
-  const cacheKey = 'dashboard:summary'
-  
-  const cached = cacheManager.analytics.get<any>(cacheKey)
-  if (cached) {
-    analyticsLogger.cacheHit(cacheKey)
-    return cached
-  }
-  
-  analyticsLogger.cacheMiss(cacheKey)
-  const startTime = Date.now()
-  
-  try {
-    const [newsStats, vehicleStats, regulationStats] = await Promise.all([
-      getNewsStats(),
-      getVehicleStats(),
-      getRegulationStats()
-    ])
+  // Machine learning model training
+  private async trainTrendingModel(): Promise<void> {
+    console.log('Starting trending model training...')
     
-    const summary = {
-      overview: {
-        total_visitors_today: Math.floor(Math.random() * 2000) + 800,
-        total_page_views_today: Math.floor(Math.random() * 8000) + 3000,
-        avg_session_duration: Math.floor(Math.random() * 300) + 180,
-        bounce_rate: Math.random() * 0.2 + 0.3, // 30-50%
-        growth_visitors: Math.random() * 20 - 5, // -5% a +15%
-        growth_page_views: Math.random() * 25 - 5 // -5% a +20%
-      },
-      content_stats: {
-        total_news: newsStats.total,
-        total_videos: 18, // Baseado no mock data
-        total_vehicles: vehicleStats.total,
-        total_regulations: regulationStats.total
-      },
-      recent_activity: [
-        {
-          type: 'news' as const,
-          description: 'Nova notícia publicada: "Análise: impacto econômico da regulamentação"',
-          timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min atrás
-          value: 1
-        },
-        {
-          type: 'search' as const,
-          description: 'Pico de buscas por "contran 996"',
-          timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 min atrás
-          value: 156
-        },
-        {
-          type: 'visit' as const,
-          description: 'Tráfego elevado na página de verificador de conformidade',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1h atrás
-          value: 342
-        },
-        {
-          type: 'video' as const,
-          description: 'Vídeo sobre segurança com patinetes ganhou 500+ visualizações',
-          timestamp: new Date(Date.now() - 1000 * 60 * 90).toISOString(), // 1.5h atrás
-          value: 523
+    try {
+      const supabase = createAdminClient()
+      
+      // Get training data from the last 30 days
+      const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      
+      // Get content with their actual performance metrics
+      const { data: trainingData } = await supabase
+        .schema('autopropelidos.com.br')
+        .from('trending_history')
+        .select('*')
+        .gte('timestamp', cutoffDate.toISOString())
+        .order('timestamp', { ascending: false })
+      
+      if (!trainingData || trainingData.length < 100) {
+        console.log('Insufficient training data, skipping model training')
+        return
+      }
+      
+      // Extract features and labels
+      const features: number[][] = []
+      const labels: number[] = []
+      
+      for (const item of trainingData) {
+        const featureVector = [
+          this.normalizeFeature(item.view_count, 0, 10000),
+          this.normalizeFeature(item.view_velocity, 0, 1000),
+          this.normalizeFeature(item.engagement_rate, 0, 100),
+          this.normalizeFeature(item.time_on_page, 0, 600),
+          this.normalizeFeature(item.share_count, 0, 1000),
+          this.normalizeFeature(item.comment_count, 0, 500),
+          this.normalizeFeature(item.recency_score, 0, 100),
+          this.normalizeFeature(item.relevance_score, 0, 100),
+          this.normalizeFeature(item.seasonality_score, 0, 100),
+          this.normalizeFeature(item.category_popularity, 0, 100),
+          this.normalizeFeature(item.author_credibility, 0, 100),
+          this.normalizeFeature(item.keyword_trending, 0, 100)
+        ]
+        
+        features.push(featureVector)
+        labels.push(item.actual_trending_score)
+      }
+      
+      // Train linear regression model using gradient descent
+      const newModel = await this.trainLinearRegression(features, labels)
+      
+      // Evaluate model performance
+      const accuracy = this.evaluateModel(newModel, features, labels)
+      
+      // Update model if it's better than the current one
+      if (accuracy > this.trendingModel.accuracy) {
+        this.trendingModel = {
+          ...newModel,
+          accuracy,
+          lastTrained: new Date()
         }
-      ],
-      alerts: [
-        {
-          type: 'success' as const,
-          message: 'Cache funcionando corretamente - taxa de hit de 87%',
-          timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString()
-        },
-        {
-          type: 'info' as const,
-          message: 'Novo conteúdo disponível para indexação',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString()
-        },
-        {
-          type: 'warning' as const,
-          message: 'Aumento de 25% em buscas com zero resultados',
-          timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+        
+        console.log(`Model updated with accuracy: ${accuracy.toFixed(2)}`)
+        
+        // Save model to database
+        await this.saveModel(this.trendingModel)
+      }
+      
+    } catch (error) {
+      console.error('Error training trending model:', error)
+    }
+  }
+
+  private async trainLinearRegression(features: number[][], labels: number[]): Promise<Omit<PredictionModel, 'accuracy' | 'lastTrained'>> {
+    const learningRate = 0.01
+    const epochs = 1000
+    const numFeatures = features[0].length
+    
+    // Initialize weights and bias
+    let weights = new Array(numFeatures).fill(0).map(() => Math.random() * 0.1)
+    let bias = 0
+    
+    // Gradient descent
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      let totalError = 0
+      const weightGradients = new Array(numFeatures).fill(0)
+      let biasGradient = 0
+      
+      for (let i = 0; i < features.length; i++) {
+        // Forward pass
+        let prediction = bias
+        for (let j = 0; j < numFeatures; j++) {
+          prediction += features[i][j] * weights[j]
         }
-      ]
+        
+        // Calculate error
+        const error = prediction - labels[i]
+        totalError += error * error
+        
+        // Calculate gradients
+        for (let j = 0; j < numFeatures; j++) {
+          weightGradients[j] += error * features[i][j]
+        }
+        biasGradient += error
+      }
+      
+      // Update weights and bias
+      for (let j = 0; j < numFeatures; j++) {
+        weights[j] -= learningRate * weightGradients[j] / features.length
+      }
+      bias -= learningRate * biasGradient / features.length
+      
+      // Early stopping if error is small enough
+      if (totalError / features.length < 0.01) {
+        break
+      }
     }
     
-    cacheManager.analytics.set(cacheKey, summary, 600) // 10 minutos
+    return {
+      features: [],
+      weights,
+      bias
+    }
+  }
+
+  private evaluateModel(model: Omit<PredictionModel, 'accuracy' | 'lastTrained'>, features: number[][], labels: number[]): number {
+    let totalError = 0
+    let totalAbsoluteError = 0
     
-    const duration = Date.now() - startTime
-    analyticsLogger.info('GET_DASHBOARD_SUMMARY', `Generated dashboard summary`, {
-      visitors_today: summary.overview.total_visitors_today,
-      page_views_today: summary.overview.total_page_views_today,
-      total_content: summary.content_stats.total_news + summary.content_stats.total_videos + summary.content_stats.total_vehicles + summary.content_stats.total_regulations,
-      duration_ms: duration,
-      cached: false
-    })
+    for (let i = 0; i < features.length; i++) {
+      let prediction = model.bias
+      for (let j = 0; j < features[i].length; j++) {
+        prediction += features[i][j] * model.weights[j]
+      }
+      
+      const error = prediction - labels[i]
+      totalError += error * error
+      totalAbsoluteError += Math.abs(error)
+    }
     
-    return summary
-  } catch (error) {
-    analyticsLogger.error('GET_DASHBOARD_SUMMARY', 'Error generating dashboard summary', {
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
-    throw error
+    const mse = totalError / features.length
+    const mae = totalAbsoluteError / features.length
+    
+    // Return accuracy as 1 - normalized MAE
+    return Math.max(0, 1 - (mae / 100))
+  }
+
+  private async saveModel(model: PredictionModel): Promise<void> {
+    const supabase = createAdminClient()
+    
+    await supabase
+      .schema('autopropelidos.com.br')
+      .from('ml_models')
+      .upsert({
+        model_name: 'trending_predictor',
+        model_data: JSON.stringify(model),
+        accuracy: model.accuracy,
+        created_at: new Date().toISOString()
+      })
+  }
+
+  // Viral content detection
+  async detectViralContent(): Promise<Array<{
+    contentId: string
+    contentType: 'news' | 'video'
+    viralScore: number
+    factors: string[]
+  }>> {
+    const trendingScores = await this.calculateTrendingScores()
+    const viralContent = []
+    
+    for (const score of trendingScores) {
+      const viralFactors = []
+      let viralScore = 0
+      
+      // High view velocity
+      if (score.factors.velocity > 100) {
+        viralFactors.push('high_velocity')
+        viralScore += 30
+      }
+      
+      // High engagement rate
+      if (score.factors.engagement > 80) {
+        viralFactors.push('high_engagement')
+        viralScore += 25
+      }
+      
+      // High social sharing
+      if (score.factors.social > 50) {
+        viralFactors.push('high_social')
+        viralScore += 20
+      }
+      
+      // Exponential growth pattern
+      if (score.factors.velocity > score.factors.views * 0.1) {
+        viralFactors.push('exponential_growth')
+        viralScore += 25
+      }
+      
+      if (viralScore > 70) {
+        viralContent.push({
+          contentId: score.contentId,
+          contentType: score.contentType,
+          viralScore,
+          factors: viralFactors
+        })
+      }
+    }
+    
+    return viralContent.sort((a, b) => b.viralScore - a.viralScore)
+  }
+
+  // Trend prediction system
+  async predictTrends(days: number = 7): Promise<Array<{
+    keyword: string
+    currentScore: number
+    predictedScore: number
+    confidence: number
+    trend: 'rising' | 'falling' | 'stable'
+  }>> {
+    const supabase = createAdminClient()
+    
+    // Get historical keyword trends
+    const { data: keywordHistory } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('keyword_trends')
+      .select('*')
+      .gte('timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      .order('timestamp', { ascending: true })
+    
+    const predictions = []
+    const keywordGroups = this.groupBy(keywordHistory || [], 'keyword')
+    
+    for (const [keyword, history] of Object.entries(keywordGroups)) {
+      if (history.length < 5) continue // Need at least 5 data points
+      
+      const currentScore = history[history.length - 1].trend_score
+      const predictedScore = this.predictKeywordTrend(history, days)
+      const confidence = this.calculatePredictionConfidence(history)
+      
+      const trend = predictedScore > currentScore * 1.1 ? 'rising' :
+                   predictedScore < currentScore * 0.9 ? 'falling' : 'stable'
+      
+      predictions.push({
+        keyword,
+        currentScore,
+        predictedScore,
+        confidence,
+        trend
+      })
+    }
+    
+    return predictions.sort((a, b) => b.predictedScore - a.predictedScore)
+  }
+
+  private predictKeywordTrend(history: any[], days: number): number {
+    // Simple linear regression for trend prediction
+    const x = history.map((_, index) => index)
+    const y = history.map(item => item.trend_score)
+    
+    const n = x.length
+    const sumX = x.reduce((sum, val) => sum + val, 0)
+    const sumY = y.reduce((sum, val) => sum + val, 0)
+    const sumXY = x.reduce((sum, val, i) => sum + val * y[i], 0)
+    const sumXX = x.reduce((sum, val) => sum + val * val, 0)
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
+    const intercept = (sumY - slope * sumX) / n
+    
+    // Predict for future days
+    const futureX = n + days
+    return Math.max(0, Math.min(100, slope * futureX + intercept))
+  }
+
+  private calculatePredictionConfidence(history: any[]): number {
+    // Calculate R-squared for confidence
+    const y = history.map(item => item.trend_score)
+    const mean = y.reduce((sum, val) => sum + val, 0) / y.length
+    
+    const totalSumSquares = y.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0)
+    const residualSumSquares = y.reduce((sum, val, i) => {
+      const predicted = this.predictKeywordTrend(history.slice(0, i + 1), 0)
+      return sum + Math.pow(val - predicted, 2)
+    }, 0)
+    
+    const rSquared = 1 - (residualSumSquares / totalSumSquares)
+    return Math.max(0, Math.min(1, rSquared)) * 100
+  }
+
+  private groupBy(array: any[], key: string): Record<string, any[]> {
+    return array.reduce((groups, item) => {
+      const value = item[key]
+      if (!groups[value]) {
+        groups[value] = []
+      }
+      groups[value].push(item)
+      return groups
+    }, {} as Record<string, any[]>)
+  }
+
+  // Analytics helper methods
+  async getDailyViews(days: number = 30): Promise<Array<{date: string, views: number}>> {
+    const supabase = createAdminClient()
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    
+    const { data: dailyViews } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('timestamp, views')
+      .gte('timestamp', cutoffDate.toISOString())
+      .order('timestamp', { ascending: true })
+    
+    // Group by date
+    const viewsByDate = dailyViews?.reduce((acc, item) => {
+      const date = new Date(item.timestamp).toISOString().split('T')[0]
+      if (!acc[date]) acc[date] = 0
+      acc[date] += item.views
+      return acc
+    }, {} as Record<string, number>) || {}
+    
+    return Object.entries(viewsByDate).map(([date, views]) => ({ date, views }))
+  }
+
+  async getTopContent(limit: number = 10): Promise<Array<{
+    contentId: string
+    contentType: 'news' | 'video'
+    title: string
+    views: number
+    score: number
+  }>> {
+    const trendingScores = await this.calculateTrendingScores()
+    return trendingScores.slice(0, limit).map(score => ({
+      contentId: score.contentId,
+      contentType: score.contentType,
+      title: 'Content Title', // This would need to be fetched from the content table
+      views: score.factors.views,
+      score: score.score
+    }))
+  }
+
+  async getUserEngagement(): Promise<{
+    avgTimeOnPage: number
+    bounceRate: number
+    pageViews: number
+    uniqueUsers: number
+  }> {
+    const supabase = createAdminClient()
+    const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    
+    const { data: engagement } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('duration, bounce_rate, views, unique_views')
+      .gte('timestamp', cutoffDate.toISOString())
+    
+    if (!engagement || engagement.length === 0) {
+      return { avgTimeOnPage: 0, bounceRate: 0, pageViews: 0, uniqueUsers: 0 }
+    }
+    
+    const avgTimeOnPage = engagement.reduce((sum, item) => sum + item.duration, 0) / engagement.length
+    const avgBounceRate = engagement.reduce((sum, item) => sum + (item.bounce_rate || 0), 0) / engagement.length
+    const totalPageViews = engagement.reduce((sum, item) => sum + item.views, 0)
+    const totalUniqueUsers = engagement.reduce((sum, item) => sum + item.unique_views, 0)
+    
+    return {
+      avgTimeOnPage,
+      bounceRate: avgBounceRate,
+      pageViews: totalPageViews,
+      uniqueUsers: totalUniqueUsers
+    }
+  }
+
+  async getTrafficSources(): Promise<Array<{source: string, percentage: number}>> {
+    const supabase = createAdminClient()
+    const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    
+    const { data: traffic } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('source, views')
+      .gte('timestamp', cutoffDate.toISOString())
+    
+    const sourceViews = traffic?.reduce((acc, item) => {
+      if (!acc[item.source]) acc[item.source] = 0
+      acc[item.source] += item.views
+      return acc
+    }, {} as Record<string, number>) || {}
+    
+    const totalViews = Object.values(sourceViews).reduce((sum, views) => sum + views, 0)
+    
+    return Object.entries(sourceViews).map(([source, views]) => ({
+      source,
+      percentage: (views / totalViews) * 100
+    }))
+  }
+
+  async getDeviceStats(): Promise<Array<{device: string, percentage: number}>> {
+    const supabase = createAdminClient()
+    const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    
+    const { data: devices } = await supabase
+      .schema('autopropelidos.com.br')
+      .from('analytics')
+      .select('device, views')
+      .gte('timestamp', cutoffDate.toISOString())
+    
+    const deviceViews = devices?.reduce((acc, item) => {
+      if (!acc[item.device]) acc[item.device] = 0
+      acc[item.device] += item.views
+      return acc
+    }, {} as Record<string, number>) || {}
+    
+    const totalViews = Object.values(deviceViews).reduce((sum, views) => sum + views, 0)
+    
+    return Object.entries(deviceViews).map(([device, views]) => ({
+      device,
+      percentage: (views / totalViews) * 100
+    }))
+  }
+
+  async processRecentContent(): Promise<number> {
+    // This would process recent content for analytics
+    // Return the number of processed items
+    return 100 // Placeholder
   }
 }
 
-export function invalidateAnalyticsCache(pattern?: string): number {
-  const invalidated = cacheManager.analytics.invalidate(pattern || '.*')
-  analyticsLogger.info('INVALIDATE_CACHE', `Invalidated ${invalidated} cache entries`, {
-    pattern: pattern || 'all'
-  })
-  return invalidated
-}
+// Singleton instance
+export const analyticsService = new AnalyticsService()
+
+// Cleanup on process exit
+process.on('SIGINT', async () => {
+  console.log('Analytics service shutting down...')
+})
+
+process.on('SIGTERM', async () => {
+  console.log('Analytics service shutting down...')
+})

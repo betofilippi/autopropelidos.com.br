@@ -7,6 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, Calendar, ExternalLink, TrendingUp } from "lucide-react"
 import { getLatestNews } from '@/lib/services/news'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for mobile components (client-side only)
+const MobileNewsPage = dynamic(() => import('@/components/mobile/mobile-news-page'), {
+  ssr: false,
+  loading: () => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-400">Carregando notícias...</p>
+    </div>
+  </div>
+})
 
 export const metadata: Metadata = {
   title: 'Notícias sobre Equipamentos Autopropelidos | Portal Autopropelidos',
@@ -55,22 +67,74 @@ export default async function NoticiasPage() {
   const highlightedNews = news.filter(item => item.relevance_score >= 85).slice(0, 3)
   const regularNews = news.filter(item => item.relevance_score < 85)
 
+  // Transform news data for mobile component
+  const transformedNews = news.map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    image_url: item.image_url,
+    source: item.source,
+    category: item.category,
+    published_at: item.published_at,
+    url: item.url,
+    relevance_score: item.relevance_score,
+    views: Math.floor(Math.random() * 1000) + 100,
+    likes: Math.floor(Math.random() * 50) + 5,
+    comments: Math.floor(Math.random() * 20) + 1,
+    reading_time: Math.floor(Math.random() * 8) + 2,
+    tags: ['mobilidade', 'regulamentação', 'segurança', 'tecnologia'].slice(0, Math.floor(Math.random() * 3) + 1)
+  }))
+
+  const loadMoreNews = async () => {
+    'use server'
+    // In a real app, this would fetch more news from the API
+    const moreNews = await getLatestNews('all', 20)
+    return moreNews.map(item => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      image_url: item.image_url,
+      source: item.source,
+      category: item.category,
+      published_at: item.published_at,
+      url: item.url,
+      relevance_score: item.relevance_score,
+      views: Math.floor(Math.random() * 1000) + 100,
+      likes: Math.floor(Math.random() * 50) + 5,
+      comments: Math.floor(Math.random() * 20) + 1,
+      reading_time: Math.floor(Math.random() * 8) + 2,
+      tags: ['mobilidade', 'regulamentação', 'segurança', 'tecnologia'].slice(0, Math.floor(Math.random() * 3) + 1)
+    }))
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Notícias sobre Equipamentos Autopropelidos
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Fique atualizado com as últimas notícias, regulamentações e desenvolvimentos 
-              no mundo da micromobilidade urbana
-            </p>
+    <>
+      {/* Mobile-first experience */}
+      <div className="block lg:hidden">
+        <MobileNewsPage
+          initialNews={transformedNews}
+          onLoadMore={loadMoreNews}
+          hasMore={true}
+          loading={false}
+        />
+      </div>
+
+      {/* Desktop experience */}
+      <div className="hidden lg:block min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Notícias sobre Equipamentos Autopropelidos
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Fique atualizado com as últimas notícias, regulamentações e desenvolvimentos 
+                no mundo da micromobilidade urbana
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
@@ -268,6 +332,7 @@ export default async function NoticiasPage() {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

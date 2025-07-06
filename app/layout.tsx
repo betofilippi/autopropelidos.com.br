@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { SkipLinks } from "@/components/ui/skip-links"
 import { Suspense } from "react"
 import Script from "next/script"
+import { PWAProvider, PWAInstallBanner, PWAUpdateBanner } from "@/components/pwa/pwa-provider"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -234,22 +235,45 @@ export default function RootLayout({
         {/* Skip Links for keyboard navigation */}
         <SkipLinks />
         
-        <div className="min-h-screen flex flex-col">
-          <header id="navigation">
-            <NavbarWithSuspense />
-          </header>
-          
-          <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
-            {children}
-          </main>
-          
-          <div id="footer">
-            <Footer />
+        <PWAProvider>
+          <div className="min-h-screen flex flex-col">
+            <header id="navigation">
+              <NavbarWithSuspense />
+            </header>
+            
+            <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
+              {children}
+            </main>
+            
+            <div id="footer">
+              <Footer />
+            </div>
           </div>
-        </div>
+          
+          {/* PWA Install/Update Banners */}
+          <PWAInstallBanner />
+          <PWAUpdateBanner />
+        </PWAProvider>
         
         <Toaster />
         <Analytics />
+        
+        {/* Service Worker Registration */}
+        <Script id="sw-register" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(function(registration) {
+                    console.log('SW registered: ', registration);
+                  })
+                  .catch(function(registrationError) {
+                    console.log('SW registration failed: ', registrationError);
+                  });
+              });
+            }
+          `}
+        </Script>
         
         {/* Live region for dynamic announcements */}
         <div id="live-region" aria-live="polite" aria-atomic="true" className="sr-only"></div>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Portal Autopropelidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border-color: transparent;
+        }
+        
+        .btn-primary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .cached-content {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cached-content h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .cached-links {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .cached-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .cached-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .network-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .online .status-dot {
+            background: #51cf66;
+            animation: none;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .offline-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .actions {
+                gap: 0.8rem;
+            }
+            
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="network-status" id="networkStatus">
+        <div class="status-dot"></div>
+        <span>Offline</span>
+    </div>
+    
+    <div class="container">
+        <div class="offline-icon">
+            📡
+        </div>
+        
+        <h1>Você está offline</h1>
+        <p>
+            Não foi possível conectar à internet. Enquanto isso, você pode acessar 
+            as páginas que já visitou ou tentar novamente quando a conexão for restaurada.
+        </p>
+        
+        <div class="actions">
+            <button class="btn btn-primary" onclick="retryConnection()">
+                🔄 Tentar Novamente
+            </button>
+            <a href="/" class="btn">
+                🏠 Página Inicial
+            </a>
+        </div>
+        
+        <div class="cached-content">
+            <h3>📚 Conteúdo Disponível Offline</h3>
+            <div class="cached-links">
+                <a href="/">🏠 Página Inicial</a>
+                <a href="/noticias">📰 Notícias</a>
+                <a href="/ferramentas">🛠️ Ferramentas</a>
+                <a href="/resolucao-996">📋 Resolução 996</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check network status
+        function updateNetworkStatus() {
+            const statusEl = document.getElementById('networkStatus')
+            const statusDot = statusEl.querySelector('.status-dot')
+            const statusText = statusEl.querySelector('span')
+            
+            if (navigator.onLine) {
+                statusEl.classList.add('online')
+                statusText.textContent = 'Online'
+                statusDot.style.background = '#51cf66'
+            } else {
+                statusEl.classList.remove('online')
+                statusText.textContent = 'Offline'
+                statusDot.style.background = '#ff6b6b'
+            }
+        }
+        
+        // Retry connection
+        function retryConnection() {
+            if (navigator.onLine) {
+                // Try to navigate back or reload
+                if (window.history.length > 1) {
+                    window.history.back()
+                } else {
+                    window.location.href = '/'
+                }
+            } else {
+                // Show user that they're still offline
+                alert('Ainda sem conexão. Verifique sua rede e tente novamente.')
+            }
+        }
+        
+        // Listen for network status changes
+        window.addEventListener('online', () => {
+            updateNetworkStatus()
+            setTimeout(() => {
+                window.location.reload()
+            }, 1000)
+        })
+        
+        window.addEventListener('offline', updateNetworkStatus)
+        
+        // Initial status check
+        updateNetworkStatus()
+        
+        // Auto-retry every 30 seconds
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload()
+            }
+        }, 30000)
+        
+        // Add some interactive feedback
+        document.querySelectorAll('.btn, .cached-links a').forEach(el => {
+            el.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)'
+                setTimeout(() => {
+                    this.style.transform = ''
+                }, 150)
+            })
+        })
+    </script>
+</body>
+</html>
