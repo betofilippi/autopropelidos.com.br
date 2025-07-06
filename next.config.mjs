@@ -7,6 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    domains: ['placehold.co'],
     unoptimized: true,
   },
   transpilePackages: ['@supabase/ssr', '@supabase/supabase-js'],
