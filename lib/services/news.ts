@@ -174,7 +174,43 @@ export async function getLatestNews(
   category?: string,
   limit: number = 10
 ) {
-  // Mock data for development - replace with database call when Supabase is configured
+  // Use mock data for now until Supabase is properly configured
+  console.log('Using mock data for news - Supabase not configured')
+  return getMockNews(category, limit)
+  
+  /* 
+  // Commented out until Supabase is configured
+  const supabase = await createClient()
+  
+  try {
+    let query = supabase
+      .from('news')
+      .select('*')
+      .order('published_at', { ascending: false })
+      .limit(limit)
+    
+    if (category && category !== 'all') {
+      query = query.eq('category', category)
+    }
+    
+    const { data, error } = await query
+    
+    if (error) {
+      console.error('Error fetching news from database:', error)
+      // Fallback to mock data if database fails
+      return getMockNews(category, limit)
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('Database connection error:', error)
+    // Fallback to mock data if database connection fails
+    return getMockNews(category, limit)
+  }
+  */
+}
+
+function getMockNews(category?: string, limit: number = 10) {
   const mockNews = [
     {
       id: '1',
@@ -184,7 +220,7 @@ export async function getLatestNews(
       source: 'Portal do Trânsito',
       published_at: '2023-06-15T10:00:00Z',
       category: 'regulation',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 95
     },
     {
@@ -195,7 +231,7 @@ export async function getLatestNews(
       source: 'G1 Trânsito',
       published_at: '2023-12-01T08:30:00Z',
       category: 'safety',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 88
     },
     {
@@ -206,7 +242,7 @@ export async function getLatestNews(
       source: 'Folha de São Paulo',
       published_at: '2024-01-10T14:20:00Z',
       category: 'urban_mobility',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 82
     },
     {
@@ -217,7 +253,7 @@ export async function getLatestNews(
       source: 'TechTudo',
       published_at: '2024-02-05T16:45:00Z',
       category: 'technology',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 75
     },
     {
@@ -228,7 +264,7 @@ export async function getLatestNews(
       source: 'UOL Carros',
       published_at: '2024-03-12T09:15:00Z',
       category: 'regulation',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 92
     },
     {
@@ -239,7 +275,7 @@ export async function getLatestNews(
       source: 'Estadão',
       published_at: '2024-04-08T11:30:00Z',
       category: 'urban_mobility',
-      image_url: '/images/news-placeholder.jpg',
+      image_url: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=500&h=300&fit=crop&crop=center',
       relevance_score: 79
     }
   ]
@@ -253,6 +289,19 @@ export async function getLatestNews(
 }
 
 export async function searchNews(searchTerm: string) {
+  // Use mock data for now until Supabase is properly configured
+  console.log('Using mock search for news - Supabase not configured')
+  const allNews = getMockNews()
+  
+  const filteredNews = allNews.filter(news => 
+    news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    news.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  
+  return filteredNews.slice(0, 20)
+  
+  /*
+  // Commented out until Supabase is configured
   const supabase = await createClient()
   
   const { data, error } = await supabase
@@ -268,4 +317,5 @@ export async function searchNews(searchTerm: string) {
   }
   
   return data || []
+  */
 }

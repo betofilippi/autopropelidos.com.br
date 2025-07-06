@@ -143,13 +143,13 @@ export async function aggregateYouTubeVideos() {
     
     // Verificar se o vídeo já existe
     const { data: existing } = await supabase
-      .from('videos')
+      .from('"autopropelidos.com.br"."videos"')
       .select('id')
       .eq('youtube_id', video.id.videoId)
       .single()
 
     if (!existing) {
-      await supabase.from('videos').insert({
+      await supabase.from('"autopropelidos.com.br"."videos"').insert({
         youtube_id: video.id.videoId,
         title: video.snippet.title,
         description: video.snippet.description,
@@ -367,7 +367,43 @@ export async function getLatestVideos(
   category?: string,
   limit: number = 10
 ) {
-  // Mock data for development - replace with database call when Supabase is configured
+  // Use mock data for now until Supabase is properly configured
+  console.log('Using mock data for videos - Supabase not configured')
+  return getMockVideos(category, limit)
+  
+  /*
+  // Commented out until Supabase is configured
+  const supabase = await createClient()
+  
+  try {
+    let query = supabase
+      .from('videos')
+      .select('*')
+      .order('published_at', { ascending: false })
+      .limit(limit)
+    
+    if (category && category !== 'all') {
+      query = query.eq('category', category)
+    }
+    
+    const { data, error } = await query
+    
+    if (error) {
+      console.error('Error fetching videos from database:', error)
+      // Fallback to mock data if database fails
+      return getMockVideos(category, limit)
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('Database connection error:', error)
+    // Fallback to mock data if database connection fails
+    return getMockVideos(category, limit)
+  }
+  */
+}
+
+function getMockVideos(category?: string, limit: number = 10) {
   const mockVideos = [
     {
       id: '1',
@@ -376,7 +412,7 @@ export async function getLatestVideos(
       description: 'Entenda completamente a nova regulamentação que define patinetes elétricos, bicicletas elétricas e ciclomotores',
       channel_name: 'Portal do Trânsito Oficial',
       channel_id: 'UC1234567890',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2023-06-20T15:30:00Z',
       duration: 'PT8M45S',
       view_count: 125000,
@@ -391,7 +427,7 @@ export async function getLatestVideos(
       description: 'Dicas essenciais de segurança para circular com patinetes elétricos nas ruas e ciclofaixas',
       channel_name: 'Jornal da Band',
       channel_id: 'UCX8pU3lBmmGiEchT8kq_LrQ',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2023-11-15T09:20:00Z',
       duration: 'PT12M30S',
       view_count: 89000,
@@ -406,7 +442,7 @@ export async function getLatestVideos(
       description: 'Análise completa dos modelos mais populares de e-bikes disponíveis no mercado brasileiro',
       channel_name: 'Auto Esporte',
       channel_id: 'UC08cNmV6kNFGKcFM0sWTqTg',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2024-01-08T14:15:00Z',
       duration: 'PT18M22S',
       view_count: 156000,
@@ -421,7 +457,7 @@ export async function getLatestVideos(
       description: 'Reportagem especial sobre acidentes com equipamentos de micromobilidade e medidas preventivas',
       channel_name: 'Record News',
       channel_id: 'UCoa-D_VfMkFrCYodrOC9-mA',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2023-09-22T20:45:00Z',
       duration: 'PT15M10S',
       view_count: 67000,
@@ -436,7 +472,7 @@ export async function getLatestVideos(
       description: 'Como os equipamentos autopropelidos estão transformando o transporte urbano no Brasil',
       channel_name: 'CNN Brasil',
       channel_id: 'UCG1QNnL7s6MYqHSoBl7LRbQ',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2024-02-28T11:00:00Z',
       duration: 'PT22M15S',
       view_count: 203000,
@@ -451,7 +487,7 @@ export async function getLatestVideos(
       description: 'Tutorial detalhado sobre como regularizar seu ciclomotor conforme a nova legislação',
       channel_name: 'DETRAN Oficial',
       channel_id: 'UC98765432100',
-      thumbnail_url: '/images/video-placeholder.jpg',
+      thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&h=300&fit=crop&crop=center',
       published_at: '2024-03-05T16:30:00Z',
       duration: 'PT10M40S',
       view_count: 45000,
@@ -470,6 +506,19 @@ export async function getLatestVideos(
 }
 
 export async function searchVideos(searchTerm: string) {
+  // Use mock data for now until Supabase is properly configured
+  console.log('Using mock search for videos - Supabase not configured')
+  const allVideos = getMockVideos()
+  
+  const filteredVideos = allVideos.filter(video => 
+    video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    video.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  
+  return filteredVideos.slice(0, 20)
+  
+  /*
+  // Commented out until Supabase is configured
   const supabase = await createClient()
   
   const { data, error } = await supabase
@@ -485,4 +534,5 @@ export async function searchVideos(searchTerm: string) {
   }
   
   return data || []
+  */
 }
