@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Play, Calendar, Eye, ArrowRight } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 interface VideoItem {
@@ -77,11 +78,12 @@ export default function FeaturedVideos({ videos }: FeaturedVideosProps) {
           {videos.map((video) => (
             <Card key={video.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
               <div className="relative">
-                <div className="h-48 bg-black">
-                  <img
+                <div className="relative h-48 bg-black">
+                  <Image
                     src={video.thumbnail_url}
                     alt={video.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
                   <div className="absolute inset-0 flex items-center justify-center">

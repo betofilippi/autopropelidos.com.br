@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, ExternalLink, ArrowRight } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 interface NewsItem {
@@ -65,11 +66,12 @@ export default function LatestNews({ news }: LatestNewsProps) {
           {news.map((item) => (
             <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               {item.image_url && (
-                <div className="h-48 bg-gray-100 dark:bg-gray-700">
-                  <img
+                <div className="relative h-48 bg-gray-100 dark:bg-gray-700">
+                  <Image
                     src={item.image_url}
                     alt={item.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
               )}

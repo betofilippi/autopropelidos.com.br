@@ -25,9 +25,6 @@ export async function createClient() {
           }
         },
       },
-      db: {
-        schema: 'autopropelidos.com.br'
-      }
     }
   )
 }

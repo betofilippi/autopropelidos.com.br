@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, ArrowRight, Flame } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 const featuredNews = [
@@ -9,7 +10,7 @@ const featuredNews = [
     title: "Resolução 996: Guia Completo das Novas Regras para Autopropelidos",
     excerpt:
       "Análise detalhada de todas as mudanças na regulamentação que afetam usuários de bicicletas elétricas, patinetes e outros equipamentos",
-    image: "https://placehold.co/600x400/e5e7eb/9ca3af?text=News+Image",
+    image: "/placeholder.svg?height=400&width=600",
     category: "Legislação",
     date: "2024-02-25",
     readTime: "12 min",
@@ -20,7 +21,7 @@ const featuredNews = [
     id: "2",
     title: "E-bikes Nacionais vs Importadas: Comparativo Completo 2024",
     excerpt: "Análise técnica e financeira dos principais modelos disponíveis no mercado brasileiro",
-    image: "https://placehold.co/400x300/e5e7eb/9ca3af?text=News+Image",
+    image: "/placeholder.svg?height=300&width=400",
     category: "Comparativos",
     date: "2024-02-24",
     readTime: "8 min",
@@ -29,7 +30,7 @@ const featuredNews = [
     id: "3",
     title: "Segurança em Primeiro Lugar: Equipamentos Obrigatórios",
     excerpt: "Lista atualizada dos EPIs necessários para circular legalmente com equipamentos autopropelidos",
-    image: "https://placehold.co/400x300/e5e7eb/9ca3af?text=News+Image",
+    image: "/placeholder.svg?height=300&width=400",
     category: "Segurança",
     date: "2024-02-23",
     readTime: "6 min",
@@ -38,7 +39,7 @@ const featuredNews = [
     id: "4",
     title: "Baterias de Lítio: Tecnologia e Cuidados Essenciais",
     excerpt: "Como maximizar a vida útil da bateria do seu equipamento autopropelido",
-    image: "https://placehold.co/400x300/e5e7eb/9ca3af?text=News+Image",
+    image: "/placeholder.svg?height=300&width=400",
     category: "Tecnologia",
     date: "2024-02-22",
     readTime: "10 min",
@@ -67,11 +68,12 @@ export function FeaturedNews() {
         <div className="lg:col-span-2">
           <Link href={`/noticias/${mainNews.id}`}>
             <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-              <div className="relative h-96">
-                <img
-                  src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400"}
+              <div className="relative h-96 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+                <Image
+                  src={mainNews.image || "/placeholder.svg"}
                   alt={mainNews.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {mainNews.trending && (
@@ -109,11 +111,12 @@ export function FeaturedNews() {
               <Card className="hover:shadow-lg transition-shadow group">
                 <CardContent className="p-0">
                   <div className="flex gap-4">
-                    <div className="w-32 h-24 flex-shrink-0 overflow-hidden rounded-l-lg">
-                      <img
-                        src={"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300"}
+                    <div className="relative w-32 h-24 flex-shrink-0 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+                      <Image
+                        src={news.image || "/placeholder.svg"}
                         alt={news.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        className="object-cover rounded-l-lg group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div className="p-4 flex-1">

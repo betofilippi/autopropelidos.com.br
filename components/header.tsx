@@ -9,12 +9,9 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { Menu } from "lucide-react"
+import { Search, Menu } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "./theme-toggle"
-import { SearchDialog } from "./search"
-import { MobileNav } from "./mobile-nav"
-import { Search } from "lucide-react"
 
 export default function Header() {
   return (
@@ -27,25 +24,102 @@ export default function Header() {
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link href="/noticias" legacyBehavior passHref>
-                <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                  Notícias
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuTrigger>Notícias</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
+                  <div className="row-span-3">
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-500 to-blue-600 p-6 no-underline outline-none focus:shadow-md text-white"
+                        href="/resolucao-996"
+                      >
+                        <div className="mb-2 mt-4 text-lg font-medium">Resolução 996</div>
+                        <p className="text-sm leading-tight text-blue-100">Entenda a nova regulamentação do CONTRAN</p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </div>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/categoria/legislacao"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Legislação</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Leis e regulamentações atualizadas
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/categoria/mercado"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Mercado</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Tendências e análises do setor
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/categoria/tecnologia"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Tecnologia</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Inovações e novidades técnicas
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                </div>
+              </NavigationMenuContent>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/videos" legacyBehavior passHref>
-                <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                  Vídeos
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuTrigger>Guias</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="grid gap-3 p-4 w-[400px]">
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/guias/iniciante"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Guia do Iniciante</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Primeiros passos com equipamentos autopropelidos
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/guias/seguranca"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Segurança</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Dicas para circular com segurança
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/guias/manutencao"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
+                      <div className="text-sm font-medium leading-none">Manutenção</div>
+                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        Cuidados com seu equipamento
+                      </p>
+                    </Link>
+                  </NavigationMenuLink>
+                </div>
+              </NavigationMenuContent>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/ferramentas" legacyBehavior passHref>
+              <Link href="/sobre" legacyBehavior passHref>
                 <NavigationMenuLink className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                  Ferramentas
+                  Sobre
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
@@ -53,22 +127,15 @@ export default function Header() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-          <SearchDialog>
-            <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              Buscar...
-              <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                ⌘K
-              </kbd>
-            </Button>
-          </SearchDialog>
-          <SearchDialog>
-            <Button variant="ghost" size="icon" className="flex sm:hidden">
-              <Search className="h-4 w-4" />
-            </Button>
-          </SearchDialog>
+          <Button variant="ghost" size="icon">
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Buscar</span>
+          </Button>
           <ThemeToggle />
-          <MobileNav />
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Menu</span>
+          </Button>
         </div>
       </div>
     </header>

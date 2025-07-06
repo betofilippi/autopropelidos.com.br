@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Play, TrendingUp } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 export function HeroSection() {
@@ -62,11 +63,13 @@ export function HeroSection() {
             </div>
           </div>
           <div className="relative">
-            <div className="h-[600px] w-full">
-              <img
+            <div className="relative h-[600px] w-full">
+              <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0926_Branco-Photoroom-OjT3fZXgD8t6eitNTjXuM51UeTH5YG.png"
                 alt="Equipamento autopropelido moderno"
-                className="w-full h-full object-contain drop-shadow-2xl"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
               />
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-emerald-600/20 blur-3xl -z-10" />
             </div>

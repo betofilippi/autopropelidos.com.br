@@ -7,244 +7,347 @@ export type Json =
   | Json[]
 
 export type Database = {
-  "autopropelidos.com.br": {
+  public: {
     Tables: {
-      analytics: {
-        Row: {
-          id: number
-          event_type: string
-          page_url: string | null
-          user_id: string | null
-          metadata: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: number
-          event_type: string
-          page_url?: string | null
-          user_id?: string | null
-          metadata?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: number
-          event_type?: string
-          page_url?: string | null
-          user_id?: string | null
-          metadata?: Json | null
-          created_at?: string
-        }
-        Relationships: []
-      }
       news: {
         Row: {
-          id: number
+          id: string
+          created_at: string
           title: string
           description: string | null
           content: string | null
           url: string
-          source: string | null
-          category: string | null
-          tags: string[] | null
+          source: string
+          source_logo: string | null
+          published_at: string
+          category: 'regulation' | 'safety' | 'technology' | 'urban_mobility' | 'general'
+          tags: string[]
           image_url: string | null
-          published_at: string | null
-          relevance_score: number | null
-          created_at: string
-          updated_at: string
+          relevance_score: number
         }
         Insert: {
-          id?: number
+          id?: string
+          created_at?: string
           title: string
           description?: string | null
           content?: string | null
           url: string
-          source?: string | null
-          category?: string | null
-          tags?: string[] | null
+          source: string
+          source_logo?: string | null
+          published_at: string
+          category: 'regulation' | 'safety' | 'technology' | 'urban_mobility' | 'general'
+          tags?: string[]
           image_url?: string | null
-          published_at?: string | null
-          relevance_score?: number | null
-          created_at?: string
-          updated_at?: string
+          relevance_score?: number
         }
         Update: {
-          id?: number
+          id?: string
+          created_at?: string
           title?: string
           description?: string | null
           content?: string | null
           url?: string
-          source?: string | null
-          category?: string | null
-          tags?: string[] | null
+          source?: string
+          source_logo?: string | null
+          published_at?: string
+          category?: 'regulation' | 'safety' | 'technology' | 'urban_mobility' | 'general'
+          tags?: string[]
           image_url?: string | null
-          published_at?: string | null
-          relevance_score?: number | null
-          created_at?: string
-          updated_at?: string
+          relevance_score?: number
         }
-        Relationships: []
-      }
-      regulations: {
-        Row: {
-          id: number
-          title: string
-          description: string | null
-          content: string | null
-          category: string | null
-          tags: string[] | null
-          effective_date: string | null
-          status: string | null
-          source_url: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: number
-          title: string
-          description?: string | null
-          content?: string | null
-          category?: string | null
-          tags?: string[] | null
-          effective_date?: string | null
-          status?: string | null
-          source_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: number
-          title?: string
-          description?: string | null
-          content?: string | null
-          category?: string | null
-          tags?: string[] | null
-          effective_date?: string | null
-          status?: string | null
-          source_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          id: number
-          email: string
-          name: string | null
-          avatar_url: string | null
-          preferences: Json | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: number
-          email: string
-          name?: string | null
-          avatar_url?: string | null
-          preferences?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: number
-          email?: string
-          name?: string | null
-          avatar_url?: string | null
-          preferences?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      vehicles: {
-        Row: {
-          id: number
-          brand: string
-          model: string
-          year: number | null
-          type: string | null
-          specifications: Json | null
-          price_range: string | null
-          availability: string | null
-          image_url: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: number
-          brand: string
-          model: string
-          year?: number | null
-          type?: string | null
-          specifications?: Json | null
-          price_range?: string | null
-          availability?: string | null
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: number
-          brand?: string
-          model?: string
-          year?: number | null
-          type?: string | null
-          specifications?: Json | null
-          price_range?: string | null
-          availability?: string | null
-          image_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       videos: {
         Row: {
-          id: number
+          id: string
+          created_at: string
+          youtube_id: string
           title: string
           description: string | null
-          youtube_id: string
-          thumbnail_url: string | null
+          channel_name: string
+          channel_id: string
+          thumbnail_url: string
+          published_at: string
           duration: string | null
           view_count: number | null
-          category: string | null
-          tags: string[] | null
-          published_at: string | null
-          relevance_score: number | null
-          created_at: string
-          updated_at: string
+          category: 'news_report' | 'educational' | 'analysis' | 'review' | 'tutorial'
+          tags: string[]
+          transcript: string | null
+          relevance_score: number
         }
         Insert: {
-          id?: number
+          id?: string
+          created_at?: string
+          youtube_id: string
           title: string
           description?: string | null
-          youtube_id: string
-          thumbnail_url?: string | null
+          channel_name: string
+          channel_id: string
+          thumbnail_url: string
+          published_at: string
           duration?: string | null
           view_count?: number | null
-          category?: string | null
-          tags?: string[] | null
-          published_at?: string | null
-          relevance_score?: number | null
-          created_at?: string
-          updated_at?: string
+          category: 'news_report' | 'educational' | 'analysis' | 'review' | 'tutorial'
+          tags?: string[]
+          transcript?: string | null
+          relevance_score?: number
         }
         Update: {
-          id?: number
+          id?: string
+          created_at?: string
+          youtube_id?: string
           title?: string
           description?: string | null
-          youtube_id?: string
-          thumbnail_url?: string | null
+          channel_name?: string
+          channel_id?: string
+          thumbnail_url?: string
+          published_at?: string
           duration?: string | null
           view_count?: number | null
-          category?: string | null
-          tags?: string[] | null
-          published_at?: string | null
-          relevance_score?: number | null
-          created_at?: string
-          updated_at?: string
+          category?: 'news_report' | 'educational' | 'analysis' | 'review' | 'tutorial'
+          tags?: string[]
+          transcript?: string | null
+          relevance_score?: number
         }
-        Relationships: []
+      }
+      regulations: {
+        Row: {
+          id: string
+          created_at: string
+          city: string | null
+          state: string
+          country: string
+          regulation_type: 'municipal' | 'state' | 'federal'
+          title: string
+          description: string
+          requirements: Json
+          effective_date: string
+          source_url: string | null
+          last_updated: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          city?: string | null
+          state: string
+          country?: string
+          regulation_type: 'municipal' | 'state' | 'federal'
+          title: string
+          description: string
+          requirements?: Json
+          effective_date: string
+          source_url?: string | null
+          last_updated?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          city?: string | null
+          state?: string
+          country?: string
+          regulation_type?: 'municipal' | 'state' | 'federal'
+          title?: string
+          description?: string
+          requirements?: Json
+          effective_date?: string
+          source_url?: string | null
+          last_updated?: string
+        }
+      }
+      vehicles: {
+        Row: {
+          id: string
+          created_at: string
+          brand: string
+          model: string
+          year: number
+          category: 'electric_bicycle' | 'moped' | 'self_propelled' | 'other'
+          motor_power_watts: number
+          max_speed_kmh: number
+          has_pedal_assist: boolean
+          has_throttle: boolean
+          width_cm: number | null
+          wheelbase_cm: number | null
+          weight_kg: number | null
+          battery_capacity_wh: number | null
+          price_brl: number | null
+          image_url: string | null
+          manufacturer_url: string | null
+          compliant_996: boolean
+          compliance_notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          brand: string
+          model: string
+          year: number
+          category: 'electric_bicycle' | 'moped' | 'self_propelled' | 'other'
+          motor_power_watts: number
+          max_speed_kmh: number
+          has_pedal_assist?: boolean
+          has_throttle?: boolean
+          width_cm?: number | null
+          wheelbase_cm?: number | null
+          weight_kg?: number | null
+          battery_capacity_wh?: number | null
+          price_brl?: number | null
+          image_url?: string | null
+          manufacturer_url?: string | null
+          compliant_996?: boolean
+          compliance_notes?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          brand?: string
+          model?: string
+          year?: number
+          category?: 'electric_bicycle' | 'moped' | 'self_propelled' | 'other'
+          motor_power_watts?: number
+          max_speed_kmh?: number
+          has_pedal_assist?: boolean
+          has_throttle?: boolean
+          width_cm?: number | null
+          wheelbase_cm?: number | null
+          weight_kg?: number | null
+          battery_capacity_wh?: number | null
+          price_brl?: number | null
+          image_url?: string | null
+          manufacturer_url?: string | null
+          compliant_996?: boolean
+          compliance_notes?: string | null
+        }
+      }
+      users: {
+        Row: {
+          id: string
+          created_at: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          preferences: Json
+          newsletter_subscribed: boolean
+          notification_settings: Json
+        }
+        Insert: {
+          id: string
+          created_at?: string
+          email: string
+          full_name?: string | null
+          avatar_url?: string | null
+          preferences?: Json
+          newsletter_subscribed?: boolean
+          notification_settings?: Json
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          preferences?: Json
+          newsletter_subscribed?: boolean
+          notification_settings?: Json
+        }
+      }
+      questions: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          title: string
+          content: string
+          category: string
+          tags: string[]
+          upvotes: number
+          view_count: number
+          answered: boolean
+          best_answer_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          title: string
+          content: string
+          category: string
+          tags?: string[]
+          upvotes?: number
+          view_count?: number
+          answered?: boolean
+          best_answer_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          title?: string
+          content?: string
+          category?: string
+          tags?: string[]
+          upvotes?: number
+          view_count?: number
+          answered?: boolean
+          best_answer_id?: string | null
+        }
+      }
+      answers: {
+        Row: {
+          id: string
+          created_at: string
+          question_id: string
+          user_id: string
+          content: string
+          upvotes: number
+          is_best_answer: boolean
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          question_id: string
+          user_id: string
+          content: string
+          upvotes?: number
+          is_best_answer?: boolean
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          question_id?: string
+          user_id?: string
+          content?: string
+          upvotes?: number
+          is_best_answer?: boolean
+        }
+      }
+      analytics: {
+        Row: {
+          id: string
+          created_at: string
+          event_type: string
+          event_data: Json
+          user_id: string | null
+          session_id: string
+          page_url: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          event_type: string
+          event_data?: Json
+          user_id?: string | null
+          session_id: string
+          page_url: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          event_type?: string
+          event_data?: Json
+          user_id?: string | null
+          session_id?: string
+          page_url?: string
+        }
       }
     }
     Views: {
@@ -256,90 +359,5 @@ export type Database = {
     Enums: {
       [_ in never]: never
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
 }
-
-type PublicSchema = Database[keyof Database]
-
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
