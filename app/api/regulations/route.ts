@@ -1,107 +1,217 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getAllRegulations, searchRegulations, getRegulationById, getRegulationsByScope, getRegulationsByRegion, getRegulationStats } from '@/lib/services/regulations'
+import type { SearchFilters, PaginationOptions } from '@/lib/types/services'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now()
+  
   try {
     const searchParams = request.nextUrl.searchParams
-    const limit = searchParams.get('limit') || '10'
-    const offset = searchParams.get('offset') || '0'
-    const category = searchParams.get('category')
-    const state = searchParams.get('state')
+    const id = searchParams.get('id')
+    const search = searchParams.get('search')
+    const action = searchParams.get('action')
     
-    // Use the CLI data fetching approach since direct client is having issues
-    // This data was fetched from "autopropelidos.com.br" schema
-    const regulationsData = [
-      {
-        id: 1,
-        title: "Regulamentação de Patinetes Elétricos - São Paulo",
-        description: "Normas para circulação de patinetes elétricos na cidade de São Paulo",
-        content: "Velocidade máxima de 20 km/h nas ciclovias e ciclofaixas. Proibido circulação em calçadas.",
-        category: "municipal",
-        number: "Decreto nº 58.750",
-        year: 2019,
-        entity: "Prefeitura de São Paulo",
-        location: "São Paulo",
-        state: "SP",
-        url: "https://legislacao.prefeitura.sp.gov.br/leis/decreto-58750-de-13-de-maio-de-2019",
-        tags: ["patinete", "velocidade", "ciclovia"],
-        effective_date: "2019-05-15",
-        status: "active",
-        created_at: "2025-07-05T04:00:50.385Z",
-        updated_at: "2025-07-05T04:00:50.385Z"
-      },
-      {
-        id: 2,
-        title: "Uso de Capacete em Veículos Autopropelidos",
-        description: "Obrigatoriedade do uso de capacete para condutores de patinetes elétricos",
-        content: "É obrigatório o uso de capacete para todos os condutores de patinetes elétricos e similares.",
-        category: "estadual",
-        number: "Lei nº 17.439",
-        year: 2021,
-        entity: "Assembleia Legislativa de SP",
-        location: "Estado de São Paulo",
-        state: "SP",
-        url: "",
-        tags: ["capacete", "segurança", "obrigatório"],
-        effective_date: "2021-03-01",
-        status: "active",
-        created_at: "2025-07-05T04:00:50.385Z",
-        updated_at: "2025-07-05T04:00:50.385Z"
-      },
-      {
-        id: 3,
-        title: "Regulamentação Nacional CTB - Artigo 58",
-        description: "Código de Trânsito Brasileiro sobre veículos de propulsão humana",
-        content: "Nas vias urbanas e nas rurais de pista dupla, a circulação de bicicletas deverá ocorrer, quando não houver ciclovia, ciclofaixa, ou acostamento.",
-        category: "federal",
-        number: "CTB Art. 58",
-        year: 1997,
-        entity: "CONTRAN",
-        location: "Brasil",
-        state: "BR",
-        url: "https://www.planalto.gov.br/ccivil_03/leis/l9503.htm",
-        tags: ["CTB", "ciclovia", "federal"],
-        effective_date: "1998-01-22",
-        status: "active",
-        created_at: "2025-07-05T04:00:50.385Z",
-        updated_at: "2025-07-05T04:00:50.385Z"
+    // Se tem ID, busca uma regulamentação específica
+    if (id) {
+      const regulation = await getRegulationById(id)
+      
+      if (!regulation) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Regulation not found',
+            timestamp: new Date().toISOString()
+          },
+          { status: 404 }
+        )
       }
-    ]
-    
-    // Filter by category if provided
-    let filteredRegulations = regulationsData
-    if (category) {
-      filteredRegulations = filteredRegulations.filter(reg => reg.category === category)
+      
+      return NextResponse.json({
+        success: true,
+        data: regulation,
+        timestamp: new Date().toISOString()
+      })
     }
     
-    // Filter by state if provided
-    if (state) {
-      filteredRegulations = filteredRegulations.filter(reg => reg.state === state)
+    // Se a ação é 'stats', retorna estatísticas
+    if (action === 'stats') {
+      const stats = await getRegulationStats()
+      
+      return NextResponse.json({
+        success: true,
+        data: stats,
+        timestamp: new Date().toISOString()
+      })
     }
     
-    // Apply pagination
-    const startIndex = parseInt(offset)
-    const endIndex = startIndex + parseInt(limit)
-    const paginatedRegulations = filteredRegulations.slice(startIndex, endIndex)
+    // Parâmetros de busca e filtros
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const page = parseInt(searchParams.get('page') || '1')
+    const scope = searchParams.get('scope') as any // federal, estadual, municipal
+    const region = searchParams.get('region')
+    const type = searchParams.get('type') // lei, resolução, portaria, decreto
+    const status = searchParams.get('status') // vigente, revogado, em_tramitacao
+    const importance = searchParams.get('importance') // alta, media, baixa
+    const sortBy = searchParams.get('sortBy') as any
+    const sortOrder = searchParams.get('sortOrder') as any
+    
+    // Se tem escopo específico, usa função otimizada
+    if (scope && !search && !region && !type) {
+      const regulations = await getRegulationsByScope(scope)
+      
+      // Aplica paginação manual
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedRegulations = regulations.slice(startIndex, endIndex)
+      
+      return NextResponse.json({
+        success: true,
+        data: {
+          items: paginatedRegulations,
+          total: regulations.length,
+          page,
+          limit,
+          hasNext: endIndex < regulations.length,
+          hasPrevious: page > 1,
+          totalPages: Math.ceil(regulations.length / limit)
+        },
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    // Se tem região específica, usa função otimizada
+    if (region && !search && !type) {
+      const regulations = await getRegulationsByRegion(region)
+      
+      // Aplica paginação manual
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedRegulations = regulations.slice(startIndex, endIndex)
+      
+      return NextResponse.json({
+        success: true,
+        data: {
+          items: paginatedRegulations,
+          total: regulations.length,
+          page,
+          limit,
+          hasNext: endIndex < regulations.length,
+          hasPrevious: page > 1,
+          totalPages: Math.ceil(regulations.length / limit)
+        },
+        timestamp: new Date().toISOString()
+      })
+    }
+    
+    // Configura filtros
+    const filters: SearchFilters = {}
+    
+    if (scope === 'federal' || scope === 'estadual' || scope === 'municipal') {
+      // Filtro por escopo será aplicado no serviço
+    }
+    if (sortBy) filters.sortBy = sortBy
+    if (sortOrder) filters.sortOrder = sortOrder
+    
+    // Configura paginação
+    const pagination: PaginationOptions = { page, limit }
+    
+    let result
+    
+    // Se tem termo de busca, usa busca textual
+    if (search) {
+      result = await searchRegulations(search, filters, pagination)
+    } else {
+      // Caso contrário, lista todas com filtros
+      result = await getAllRegulations(filters, pagination)
+    }
+    
+    const duration = Date.now() - startTime
+    
+    logger.apiResponse('GET', '/api/regulations', 200, duration)
     
     return NextResponse.json({
       success: true,
-      data: paginatedRegulations,
-      pagination: {
-        total: filteredRegulations.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        hasMore: endIndex < filteredRegulations.length
-      }
+      data: result,
+      meta: {
+        search_term: search || undefined,
+        filters_applied: Object.keys(filters).length,
+        response_time_ms: duration
+      },
+      timestamp: new Date().toISOString()
     })
+    
   } catch (error) {
-    console.error('Error fetching regulations:', error)
+    const duration = Date.now() - startTime
+    
+    logger.error('API_REGULATIONS', 'Error in regulations endpoint', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration_ms: duration
+    })
+    
+    logger.apiResponse('GET', '/api/regulations', 500, duration)
+    
     return NextResponse.json(
       { 
         success: false,
-        error: 'Failed to fetch regulations',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
+    )
+  }
+}
+
+// Método POST para futuras implementações (como bookmarks, alertas de atualização, etc.)
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const action = body.action
+    
+    switch (action) {
+      case 'bookmark':
+        // Implementar sistema de favoritos para regulamentações
+        return NextResponse.json({
+          success: true,
+          message: 'Bookmark feature coming soon',
+          timestamp: new Date().toISOString()
+        })
+        
+      case 'subscribe_updates':
+        // Implementar alertas para atualizações de regulamentações
+        return NextResponse.json({
+          success: true,
+          message: 'Update subscription feature coming soon',
+          timestamp: new Date().toISOString()
+        })
+        
+      case 'report_issue':
+        // Implementar sistema para reportar problemas com regulamentações
+        return NextResponse.json({
+          success: true,
+          message: 'Issue reporting feature coming soon',
+          timestamp: new Date().toISOString()
+        })
+        
+      default:
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid action',
+            timestamp: new Date().toISOString()
+          },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Invalid request body',
+        timestamp: new Date().toISOString()
+      },
+      { status: 400 }
     )
   }
 }

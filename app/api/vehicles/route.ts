@@ -1,131 +1,184 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getAllVehicles, searchVehicles, getVehicleById, getVehiclesByType, getVehicleStats } from '@/lib/services/vehicles'
+import type { SearchFilters, PaginationOptions } from '@/lib/types/services'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now()
+  
   try {
     const searchParams = request.nextUrl.searchParams
-    const limit = searchParams.get('limit') || '10'
-    const offset = searchParams.get('offset') || '0'
-    const type = searchParams.get('type')
-    const category = searchParams.get('category')
-    const featured = searchParams.get('featured')
+    const id = searchParams.get('id')
+    const search = searchParams.get('search')
+    const action = searchParams.get('action')
     
-    // Use the CLI data fetching approach since direct client is having issues
-    // This data was fetched from "autopropelidos.com.br" schema
-    const vehiclesData = [
-      {
-        id: 1,
-        name: "Xiaomi Mi Electric Scooter Pro 2",
-        type: "patinete",
-        manufacturer: "Xiaomi",
-        model: "Mi Pro 2",
-        year: 2020,
-        description: "Patinete elétrico com autonomia de até 45km e velocidade máxima de 25km/h",
-        image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500",
-        specifications: {
-          peso: "14.2kg",
-          bateria: "474Wh",
-          potencia: "300W",
-          autonomia: "45km",
-          velocidade_max: "25km/h"
-        },
-        price_range: "R$ 2.500 - R$ 3.000",
-        category: "urbano",
-        tags: ["xiaomi", "patinete", "elétrico"],
-        rating: 4.50,
-        featured: true,
-        created_at: "2025-07-05T04:01:07.593Z",
-        updated_at: "2025-07-05T04:01:07.593Z"
-      },
-      {
-        id: 2,
-        name: "Segway Ninebot ES4",
-        type: "patinete",
-        manufacturer: "Segway",
-        model: "Ninebot ES4",
-        year: 2019,
-        description: "Patinete elétrico dobrável com suspensão dianteira e traseira",
-        image_url: "https://images.unsplash.com/photo-1544966503-7a5ac882d7e6?w=500",
-        specifications: {
-          peso: "14kg",
-          bateria: "374Wh",
-          potencia: "300W",
-          autonomia: "45km",
-          velocidade_max: "30km/h"
-        },
-        price_range: "R$ 3.000 - R$ 3.500",
-        category: "urbano",
-        tags: ["segway", "patinete", "suspensão"],
-        rating: 4.30,
-        featured: true,
-        created_at: "2025-07-05T04:01:07.593Z",
-        updated_at: "2025-07-05T04:01:07.593Z"
-      },
-      {
-        id: 3,
-        name: "Dualtron Thunder",
-        type: "patinete",
-        manufacturer: "Dualtron",
-        model: "Thunder",
-        year: 2021,
-        description: "Patinete elétrico de alta performance para longas distâncias",
-        image_url: "https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500",
-        specifications: {
-          peso: "47kg",
-          bateria: "2880Wh",
-          potencia: "5400W",
-          autonomia: "120km",
-          velocidade_max: "85km/h"
-        },
-        price_range: "R$ 15.000 - R$ 20.000",
-        category: "performance",
-        tags: ["dualtron", "performance", "longa_distancia"],
-        rating: 4.80,
-        featured: false,
-        created_at: "2025-07-05T04:01:07.593Z",
-        updated_at: "2025-07-05T04:01:07.593Z"
+    // Se tem ID, busca um veículo específico
+    if (id) {
+      const vehicle = await getVehicleById(id)
+      
+      if (!vehicle) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Vehicle not found',
+            timestamp: new Date().toISOString()
+          },
+          { status: 404 }
+        )
       }
-    ]
-    
-    // Filter by type if provided
-    let filteredVehicles = vehiclesData
-    if (type) {
-      filteredVehicles = filteredVehicles.filter(vehicle => vehicle.type === type)
+      
+      return NextResponse.json({
+        success: true,
+        data: vehicle,
+        timestamp: new Date().toISOString()
+      })
     }
     
-    // Filter by category if provided
-    if (category) {
-      filteredVehicles = filteredVehicles.filter(vehicle => vehicle.category === category)
+    // Se a ação é 'stats', retorna estatísticas
+    if (action === 'stats') {
+      const stats = await getVehicleStats()
+      
+      return NextResponse.json({
+        success: true,
+        data: stats,
+        timestamp: new Date().toISOString()
+      })
     }
     
-    // Filter by featured if provided
-    if (featured === 'true') {
-      filteredVehicles = filteredVehicles.filter(vehicle => vehicle.featured)
+    // Parâmetros de busca e filtros
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const page = parseInt(searchParams.get('page') || '1')
+    const type = searchParams.get('type') as any
+    const category = searchParams.get('category')
+    const brand = searchParams.get('brand')
+    const minPrice = searchParams.get('minPrice')
+    const maxPrice = searchParams.get('maxPrice')
+    const availability = searchParams.get('availability')
+    const sortBy = searchParams.get('sortBy') as any
+    const sortOrder = searchParams.get('sortOrder') as any
+    
+    // Se tem tipo específico, usa função otimizada
+    if (type && !search && !category && !brand) {
+      const vehicles = await getVehiclesByType(type)
+      
+      // Aplica paginação manual
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedVehicles = vehicles.slice(startIndex, endIndex)
+      
+      return NextResponse.json({
+        success: true,
+        data: {
+          items: paginatedVehicles,
+          total: vehicles.length,
+          page,
+          limit,
+          hasNext: endIndex < vehicles.length,
+          hasPrevious: page > 1,
+          totalPages: Math.ceil(vehicles.length / limit)
+        },
+        timestamp: new Date().toISOString()
+      })
     }
     
-    // Apply pagination
-    const startIndex = parseInt(offset)
-    const endIndex = startIndex + parseInt(limit)
-    const paginatedVehicles = filteredVehicles.slice(startIndex, endIndex)
+    // Configura filtros
+    const filters: SearchFilters = {}
+    
+    if (category) filters.category = category
+    if (sortBy) filters.sortBy = sortBy
+    if (sortOrder) filters.sortOrder = sortOrder
+    
+    // Configura paginação
+    const pagination: PaginationOptions = { page, limit }
+    
+    let result
+    
+    // Se tem termo de busca, usa busca textual
+    if (search) {
+      result = await searchVehicles(search, filters, pagination)
+    } else {
+      // Caso contrário, lista todos com filtros
+      result = await getAllVehicles(filters, pagination)
+    }
+    
+    const duration = Date.now() - startTime
+    
+    logger.apiResponse('GET', '/api/vehicles', 200, duration)
     
     return NextResponse.json({
       success: true,
-      data: paginatedVehicles,
-      pagination: {
-        total: filteredVehicles.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        hasMore: endIndex < filteredVehicles.length
-      }
+      data: result,
+      meta: {
+        search_term: search || undefined,
+        filters_applied: Object.keys(filters).length,
+        response_time_ms: duration
+      },
+      timestamp: new Date().toISOString()
     })
+    
   } catch (error) {
-    console.error('Error fetching vehicles:', error)
+    const duration = Date.now() - startTime
+    
+    logger.error('API_VEHICLES', 'Error in vehicles endpoint', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration_ms: duration
+    })
+    
+    logger.apiResponse('GET', '/api/vehicles', 500, duration)
+    
     return NextResponse.json(
       { 
         success: false,
-        error: 'Failed to fetch vehicles',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
+    )
+  }
+}
+
+// Método POST para futuras implementações (como favoritos, comparações, etc.)
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const action = body.action
+    
+    switch (action) {
+      case 'compare':
+        // Implementar comparação de veículos
+        return NextResponse.json({
+          success: true,
+          message: 'Vehicle comparison feature coming soon',
+          timestamp: new Date().toISOString()
+        })
+        
+      case 'favorite':
+        // Implementar sistema de favoritos
+        return NextResponse.json({
+          success: true,
+          message: 'Favorites feature coming soon',
+          timestamp: new Date().toISOString()
+        })
+        
+      default:
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid action',
+            timestamp: new Date().toISOString()
+          },
+          { status: 400 }
+        )
+    }
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Invalid request body',
+        timestamp: new Date().toISOString()
+      },
+      { status: 400 }
     )
   }
 }
