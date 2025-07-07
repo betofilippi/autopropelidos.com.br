@@ -3,21 +3,23 @@ import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
 export async function createClient() {
-  // Durante o build, sempre falha para forçar fallback
-  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
-    throw new Error('Supabase disabled during build process')
-  }
+  // Durante o build no Vercel, usar valores dummy se as variáveis não estiverem configuradas
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co'
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_anon_key'
   
-  // Durante o build, retorna null se as variáveis não estiverem configuradas
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    throw new Error('Supabase environment variables not configured')
+  // Se usar valores dummy, não conectar realmente
+  if (supabaseUrl === 'https://dummy.supabase.co' || supabaseKey === 'dummy_anon_key') {
+    // Durante o build, falha silenciosamente para usar fallback
+    if (typeof window === 'undefined') {
+      throw new Error('Supabase disabled during build process - using fallback data')
+    }
   }
 
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
