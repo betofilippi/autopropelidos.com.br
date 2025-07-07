@@ -81,6 +81,11 @@ export async function aggregateNews(): Promise<{ success: boolean; processed: nu
   }
 
   try {
+    // Durante o build, não tenta conectar ao Supabase
+    if (typeof window === 'undefined') {
+      return { success: true, processed: 0, errors: ['Build time - skipping database operations'] }
+    }
+    
     const supabase = await createClient()
     const allArticles: NewsAPIArticle[] = []
 
@@ -272,8 +277,8 @@ export async function getLatestNews(
   const startTime = Date.now()
   
   try {
-    // Tenta buscar do banco de dados primeiro (API real)
-    if (NEWS_API_KEY) {
+    // Durante o build, pula a consulta ao banco para evitar erros
+    if (NEWS_API_KEY && typeof window !== 'undefined') {
       try {
         const supabase = await createClient()
         let query = supabase

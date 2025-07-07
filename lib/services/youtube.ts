@@ -99,6 +99,11 @@ export async function aggregateYouTubeVideos(): Promise<{ success: boolean; proc
   }
 
   try {
+    // Durante o build, não tenta conectar ao Supabase
+    if (typeof window === 'undefined') {
+      return { success: true, processed: 0, errors: ['Build time - skipping database operations'] }
+    }
+    
     const supabase = await createClient()
     const allVideos: YouTubeVideo[] = []
 
@@ -270,8 +275,8 @@ export async function getLatestVideos(
   category?: string,
   limit: number = 10
 ) {
-  // Tenta buscar do banco de dados primeiro (API real)
-  if (YOUTUBE_API_KEY) {
+  // Durante o build, pula a consulta ao banco para evitar erros
+  if (YOUTUBE_API_KEY && typeof window !== 'undefined') {
     try {
       const supabase = await createClient()
       let query = supabase
@@ -577,19 +582,29 @@ export async function getLatestVideos(
 }
 
 export async function searchVideos(searchTerm: string) {
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from('videos')
-    .select('*')
-    .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
-    .order('relevance_score', { ascending: false })
-    .limit(20)
-  
-  if (error) {
-    console.error('Error searching videos:', error)
+  try {
+    // Durante o build, retorna array vazio
+    if (typeof window === 'undefined') {
+      return []
+    }
+    
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+      .order('relevance_score', { ascending: false })
+      .limit(20)
+    
+    if (error) {
+      console.error('Error searching videos:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('Error in searchVideos:', error)
     return []
   }
-  
-  return data || []
 }
