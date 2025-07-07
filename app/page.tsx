@@ -5,9 +5,7 @@ import { ArrowRight, Clock, ExternalLink, Play, FileText, Shield, Zap, TrendingU
 import Link from "next/link"
 import Image from "next/image"
 
-// Import services safely
-import { getLatestNews } from "@/lib/services/news"
-import { getLatestVideos } from "@/lib/services/youtube"
+// Services imported dynamically to avoid build issues
 
 // Paleta de cores Slate/Zinc
 const categoryColors = {
@@ -219,8 +217,11 @@ export default async function Home() {
       }
     ]
   } else {
-    // Runtime: tentar buscar dados reais
+    // Runtime: tentar buscar dados reais dinamicamente
     try {
+      const { getLatestNews } = await import('@/lib/services/news')
+      const { getLatestVideos } = await import('@/lib/services/youtube')
+      
       [latestNews, featuredVideos] = await Promise.all([
         getLatestNews(undefined, 20),
         getLatestVideos(undefined, 8)
