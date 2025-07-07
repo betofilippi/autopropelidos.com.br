@@ -1,5 +1,5 @@
 import type { NewsAPIResponse, NewsAPIArticle } from '@/lib/types/api'
-import { createClient } from '@/lib/supabase/server'
+// import { createClient } from '@/lib/supabase/server' // Commented out for build compatibility
 import { cacheManager } from '@/lib/utils/cache'
 import { newsLogger } from '@/lib/utils/logger'
 import { quickSearch } from '@/lib/utils/search'
@@ -87,6 +87,7 @@ export async function aggregateNews(): Promise<{ success: boolean; processed: nu
       return { success: true, processed: 0, errors: ['Build time - skipping database operations'] }
     }
     
+    const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const allArticles: NewsAPIArticle[] = []
 
@@ -558,7 +559,8 @@ export async function getLatestNews(
     // Durante o build, pula a consulta ao banco para evitar erros
     if (NEWS_API_KEY && typeof window !== 'undefined') {
       try {
-        const supabase = await createClient()
+        const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
         let query = supabase
           .from('news')
           .select('*')

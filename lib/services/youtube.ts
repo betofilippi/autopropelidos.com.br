@@ -1,5 +1,5 @@
 import type { YouTubeSearchResponse, YouTubeVideo } from '@/lib/types/api'
-import { createClient } from '@/lib/supabase/server'
+// import { createClient } from '@/lib/supabase/server' // Commented out for build compatibility
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!
 const YOUTUBE_API_BASE_URL = 'https://www.googleapis.com/youtube/v3'
@@ -105,6 +105,7 @@ export async function aggregateYouTubeVideos(): Promise<{ success: boolean; proc
       return { success: true, processed: 0, errors: ['Build time - skipping database operations'] }
     }
     
+    const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const allVideos: YouTubeVideo[] = []
 
@@ -562,7 +563,8 @@ export async function getLatestVideos(
   // Durante o build, pula a consulta ao banco para evitar erros
   if (YOUTUBE_API_KEY && typeof window !== 'undefined') {
     try {
-      const supabase = await createClient()
+      const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
       let query = supabase
         .from('videos')
         .select('*')
@@ -617,6 +619,7 @@ export async function searchVideos(searchTerm: string) {
       return []
     }
     
+    const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     
     const { data, error } = await supabase
