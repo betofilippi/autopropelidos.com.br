@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { SkipLinks } from "@/components/ui/skip-links"
 import { Suspense } from "react"
 import Script from "next/script"
-import { PWAProvider, PWAInstallBanner, PWAUpdateBanner } from "@/components/pwa/pwa-provider"
+// import { PWAProvider, PWAInstallBanner, PWAUpdateBanner } from "@/components/pwa/pwa-provider" // Temporarily disabled for build
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -235,25 +235,19 @@ export default function RootLayout({
         {/* Skip Links for keyboard navigation */}
         <SkipLinks />
         
-        <PWAProvider>
-          <div className="min-h-screen flex flex-col">
-            <header id="navigation">
-              <NavbarWithSuspense />
-            </header>
-            
-            <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
-              {children}
-            </main>
-            
-            <div id="footer">
-              <Footer />
-            </div>
-          </div>
+        <div className="min-h-screen flex flex-col">
+          <header id="navigation">
+            <NavbarWithSuspense />
+          </header>
           
-          {/* PWA Install/Update Banners */}
-          <PWAInstallBanner />
-          <PWAUpdateBanner />
-        </PWAProvider>
+          <main id="main-content" className="flex-grow" tabIndex={-1} role="main">
+            {children}
+          </main>
+          
+          <div id="footer">
+            <Footer />
+          </div>
+        </div>
         
         <Toaster />
         <Analytics />
