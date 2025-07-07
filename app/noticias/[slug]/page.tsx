@@ -26,17 +26,39 @@ function generateSlug(title: string): string {
 
 // Função para encontrar notícia pelo slug
 async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
-  const allNews = await getLatestNews('all', 1000)
-  return allNews.find(news => generateSlug(news.title) === slug) || null
+  try {
+    const allNews = await getLatestNews('all', 100) // Reduzido para melhor performance
+    const found = allNews.find(news => generateSlug(news.title) === slug)
+    
+    // Garantir que as propriedades essenciais existam
+    if (found) {
+      return {
+        ...found,
+        tags: found.tags || [],
+        content: found.content || found.description || '',
+        description: found.description || '',
+      }
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error getting news by slug:', error)
+    return null
+  }
 }
 
-// Função para gerar parâmetros estáticos
+// Função para gerar parâmetros estáticos - limitado para evitar problemas de build
 export async function generateStaticParams() {
-  const news = await getLatestNews('all', 100)
-  
-  return news.map((article) => ({
-    slug: generateSlug(article.title),
-  }))
+  try {
+    const news = await getLatestNews('all', 20) // Reduzido de 100 para 20
+    
+    return news.slice(0, 10).map((article) => ({
+      slug: generateSlug(article.title),
+    }))
+  } catch (error) {
+    console.error('Error generating static params:', error)
+    return [] // Retorna array vazio se houver erro
+  }
 }
 
 // Função para gerar metadata dinâmica
@@ -261,9 +283,10 @@ function RelatedNewsLoading() {
 
 // Componente para Related News
 async function RelatedNews({ newsId }: { newsId: string }) {
-  const relatedNews = await getRelatedNews(newsId, 5)
+  try {
+    const relatedNews = await getRelatedNews(newsId, 5)
 
-  if (relatedNews.length === 0) {
+    if (!relatedNews || relatedNews.length === 0) {
     return null
   }
 
@@ -284,13 +307,17 @@ async function RelatedNews({ newsId }: { newsId: string }) {
             </h4>
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>{related.source}</span>
-              <span>{formatPublishedDate(related.published_at).split(',')[0]}</span>
+              <span>{formatPublishedDate(related.published_at).split(',')[0] || formatPublishedDate(related.published_at)}</span>
             </div>
           </Link>
         ))}
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Error loading related news:', error)
+    return null
+  }
 }
 
 export default async function NewsPage({ params }: { params: { slug: string } }) {
@@ -396,7 +423,7 @@ export default async function NewsPage({ params }: { params: { slug: string } })
                 </p>
 
                 {/* Tags */}
-                {news.tags.length > 0 && (
+                {(news.tags && news.tags.length > 0) && (
                   <div className="flex flex-wrap items-center gap-2 mb-6">
                     <Tag className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     {news.tags.map((tag) => (
