@@ -265,57 +265,8 @@ export async function getLatestNews(
 ): Promise<NewsItem[]> {
   const cacheKey = `latest:${category || 'all'}:${limit}`
   
-  // Tenta buscar do cache primeiro
-  const cached = cacheManager.news.get<NewsItem[]>(cacheKey)
-  if (cached) {
-    newsLogger.cacheHit(cacheKey)
-    return cached
-  }
-  
-  newsLogger.cacheMiss(cacheKey)
-  
-  const startTime = Date.now()
-  
-  try {
-    // Durante o build, pula a consulta ao banco para evitar erros
-    if (NEWS_API_KEY && typeof window !== 'undefined') {
-      try {
-        const supabase = await createClient()
-        let query = supabase
-          .from('news')
-          .select('*')
-          .order('published_at', { ascending: false })
-          .limit(limit)
-
-        if (category && category !== 'all') {
-          query = query.eq('category', category)
-        }
-
-        const { data, error } = await query
-
-        if (!error && data && data.length > 0) {
-          // Cache os dados reais
-          cacheManager.news.set(cacheKey, data, 1800) // 30 minutos
-          
-          const duration = Date.now() - startTime
-          newsLogger.info('GET_LATEST_NEWS', `Retrieved ${data.length} news items from database`, {
-            category,
-            limit,
-            duration_ms: duration,
-            cached: false,
-            source: 'database'
-          })
-          
-          return data
-        }
-      } catch (dbError) {
-        newsLogger.error('GET_LATEST_NEWS', 'Database error, falling back to mock data', {
-          error: dbError instanceof Error ? dbError.message : 'Unknown database error'
-        })
-      }
-    }
-    
-    // Fallback para mock data se não houver API key ou dados no banco
+  // Durante o build (processo do servidor), sempre usar mock data
+  if (typeof window === 'undefined') {
     const mockNews: NewsItem[] = [
     {
       id: '1',
@@ -580,6 +531,79 @@ export async function getLatestNews(
       category: 'urban_mobility',
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
       relevance_score: 92
+    }
+  ]
+
+    let filteredNews = mockNews
+    if (category && category !== 'all') {
+      filteredNews = mockNews.filter(news => news.category === category)
+    }
+
+    return filteredNews.slice(0, limit)
+  }
+  
+  // Tenta buscar do cache primeiro
+  const cached = cacheManager.news.get<NewsItem[]>(cacheKey)
+  if (cached) {
+    newsLogger.cacheHit(cacheKey)
+    return cached
+  }
+  
+  newsLogger.cacheMiss(cacheKey)
+  
+  const startTime = Date.now()
+  
+  try {
+    // Durante o build, pula a consulta ao banco para evitar erros
+    if (NEWS_API_KEY && typeof window !== 'undefined') {
+      try {
+        const supabase = await createClient()
+        let query = supabase
+          .from('news')
+          .select('*')
+          .order('published_at', { ascending: false })
+          .limit(limit)
+
+        if (category && category !== 'all') {
+          query = query.eq('category', category)
+        }
+
+        const { data, error } = await query
+
+        if (!error && data && data.length > 0) {
+          // Cache os dados reais
+          cacheManager.news.set(cacheKey, data, 1800) // 30 minutos
+          
+          const duration = Date.now() - startTime
+          newsLogger.info('GET_LATEST_NEWS', `Retrieved ${data.length} news items from database`, {
+            category,
+            limit,
+            duration_ms: duration,
+            cached: false,
+            source: 'database'
+          })
+          
+          return data
+        }
+      } catch (dbError) {
+        newsLogger.error('GET_LATEST_NEWS', 'Database error, falling back to mock data', {
+          error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+        })
+      }
+    }
+    
+    // Fallback para mock data se não houver API key ou dados no banco
+    const mockNews: NewsItem[] = [
+    {
+      id: '1',
+      title: 'CONTRAN publica Resolução 996: Nova era para equipamentos autopropelidos',
+      description: 'Resolução regulamenta patinetes elétricos, bicicletas elétricas e ciclomotores no Brasil',
+      url: 'https://portal.cfm.org.br/noticias/contran-publica-resolucao-996',
+      source: 'Portal do Trânsito',
+      published_at: '2023-06-15T10:00:00Z',
+      category: 'regulation',
+      image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
+      relevance_score: 95
     }
   ]
 

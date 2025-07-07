@@ -275,32 +275,9 @@ export async function getLatestVideos(
   category?: string,
   limit: number = 10
 ) {
-  // Durante o build, pula a consulta ao banco para evitar erros
-  if (YOUTUBE_API_KEY && typeof window !== 'undefined') {
-    try {
-      const supabase = await createClient()
-      let query = supabase
-        .from('videos')
-        .select('*')
-        .order('published_at', { ascending: false })
-        .limit(limit)
-
-      if (category && category !== 'all') {
-        query = query.eq('category', category)
-      }
-
-      const { data, error } = await query
-
-      if (!error && data && data.length > 0) {
-        return data
-      }
-    } catch (dbError) {
-      console.error('Database error, falling back to mock data:', dbError)
-    }
-  }
-  
-  // Fallback para mock data se não houver API key ou dados no banco
-  const mockVideos = [
+  // Durante o build (processo do servidor), sempre usar mock data
+  if (typeof window === 'undefined') {
+    const mockVideos = [
     {
       id: '1',
       youtube_id: 'dQw4w9WgXcQ',
@@ -570,6 +547,57 @@ export async function getLatestVideos(
       category: 'educational',
       tags: ['meio ambiente', 'sustentabilidade', 'economia verde'],
       relevance_score: 78
+    }
+  ]
+
+    let filteredVideos = mockVideos
+    if (category && category !== 'all') {
+      filteredVideos = mockVideos.filter(video => video.category === category)
+    }
+
+    return filteredVideos.slice(0, limit)
+  }
+  
+  // Durante o build, pula a consulta ao banco para evitar erros
+  if (YOUTUBE_API_KEY && typeof window !== 'undefined') {
+    try {
+      const supabase = await createClient()
+      let query = supabase
+        .from('videos')
+        .select('*')
+        .order('published_at', { ascending: false })
+        .limit(limit)
+
+      if (category && category !== 'all') {
+        query = query.eq('category', category)
+      }
+
+      const { data, error } = await query
+
+      if (!error && data && data.length > 0) {
+        return data
+      }
+    } catch (dbError) {
+      console.error('Database error, falling back to mock data:', dbError)
+    }
+  }
+  
+  // Fallback para mock data se não houver API key ou dados no banco
+  const mockVideos = [
+    {
+      id: '1',
+      youtube_id: 'dQw4w9WgXcQ',
+      title: 'Resolução 996 do CONTRAN Explicada - Tudo sobre Equipamentos Autopropelidos',
+      description: 'Entenda completamente a nova regulamentação que define patinetes elétricos, bicicletas elétricas e ciclomotores',
+      channel_name: 'Portal do Trânsito Oficial',
+      channel_id: 'UC1234567890',
+      thumbnail_url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+      published_at: '2023-06-20T15:30:00Z',
+      duration: 'PT8M45S',
+      view_count: 125000,
+      category: 'educational',
+      tags: ['CONTRAN', '996', 'regulamentação', 'autopropelidos'],
+      relevance_score: 98
     }
   ]
 
