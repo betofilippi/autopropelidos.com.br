@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: `${news.title} | Portal Autopropelidos`,
     description: news.description,
     keywords: [
-      ...news.tags,
+      ...(news.tags || []),
       'patinete elétrico',
       'bicicleta elétrica',
       'CONTRAN 996',
@@ -114,7 +114,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       },
     },
     other: {
-      'news:keywords': news.tags.join(','),
+      'news:keywords': (news.tags || []).join(','),
       'news:section': categoryLabels[news.category as keyof typeof categoryLabels],
       'news:publish_date': publishedTime,
     },
@@ -151,8 +151,8 @@ function formatPublishedDate(dateStr: string) {
 
 function getReadingTime(content: string): number {
   const wordsPerMinute = 200
-  const words = content.split(/\s+/).length
-  return Math.ceil(words / wordsPerMinute)
+  const words = (content || '').split(/\s+/).filter(word => word.length > 0).length
+  return Math.max(1, Math.ceil(words / wordsPerMinute))
 }
 
 // Componente para Schema.org JSON-LD
@@ -186,8 +186,8 @@ function NewsSchema({ news }: { news: NewsItem }) {
       "@id": `https://autopropelidos.com.br/noticias/${generateSlug(news.title)}`
     },
     "articleSection": categoryLabels[news.category as keyof typeof categoryLabels],
-    "keywords": news.tags.join(', '),
-    "wordCount": news.content ? news.content.split(/\s+/).length : 0,
+    "keywords": (news.tags || []).join(', '),
+    "wordCount": (news.content || '').split(/\s+/).filter(word => word.length > 0).length,
     "inLanguage": "pt-BR",
     "isAccessibleForFree": true,
     "url": `https://autopropelidos.com.br/noticias/${generateSlug(news.title)}`,
@@ -300,7 +300,7 @@ export default async function NewsPage({ params }: { params: { slug: string } })
     notFound()
   }
 
-  const readingTime = getReadingTime(news.content || news.description)
+  const readingTime = getReadingTime(news.content || news.description || '')
 
   return (
     <>
