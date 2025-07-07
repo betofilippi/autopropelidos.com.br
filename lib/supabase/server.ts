@@ -3,6 +3,11 @@ import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
 export async function createClient() {
+  // Durante o build, sempre falha para forçar fallback
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    throw new Error('Supabase disabled during build process')
+  }
+  
   // Durante o build, retorna null se as variáveis não estiverem configuradas
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     throw new Error('Supabase environment variables not configured')
