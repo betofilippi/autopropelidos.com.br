@@ -5,8 +5,7 @@ import { ArrowRight, Clock, ExternalLink, Play, FileText, Shield, Zap, TrendingU
 import Link from "next/link"
 import Image from "next/image"
 
-// Services imported dynamically to avoid build issues
-
+// Página estática para evitar problemas de build com Supabase
 // Paleta de cores Slate/Zinc
 const categoryColors = {
   regulation: 'bg-slate-100 text-slate-700 border-slate-300',
@@ -24,6 +23,101 @@ const categoryLabels = {
   general: 'Geral'
 }
 
+// Mock data estático para build
+const staticMockNews = [
+  {
+    id: '1',
+    title: 'CONTRAN publica Resolução 996: Nova era para equipamentos autopropelidos',
+    description: 'Resolução regulamenta patinetes elétricos, bicicletas elétricas e ciclomotores no Brasil com novas regras de segurança e circulação.',
+    url: 'https://portal.autopropelidos.com.br/noticias/contran-996',
+    source: 'Portal do Trânsito',
+    published_at: '2023-06-15T10:00:00Z',
+    category: 'regulation',
+    image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
+    relevance_score: 95
+  },
+  {
+    id: '2',
+    title: 'Mercado de patinetes elétricos cresce 150% no Brasil',
+    description: 'Setor de micromobilidade apresenta expansão acelerada com nova regulamentação favorecendo o crescimento sustentável.',
+    url: 'https://portal.autopropelidos.com.br/noticias/mercado-crescimento',
+    source: 'Mobilidade Urbana',
+    published_at: '2024-01-10T14:30:00Z',
+    category: 'technology',
+    image_url: 'https://images.unsplash.com/photo-1558618666-7bd5ad0e9bf5?w=400&h=300&fit=crop',
+    relevance_score: 88
+  },
+  {
+    id: '3',
+    title: 'Acidentes com patinetes elétricos aumentam 40% em 2024',
+    description: 'Dados revelam necessidade de maior conscientização sobre segurança no trânsito e uso adequado de equipamentos.',
+    url: 'https://portal.autopropelidos.com.br/noticias/acidentes-dados',
+    source: 'Segurança no Trânsito',
+    published_at: '2024-02-15T09:15:00Z',
+    category: 'safety',
+    image_url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop',
+    relevance_score: 82
+  },
+  {
+    id: '4',
+    title: 'Novas ciclofaixas em São Paulo para equipamentos autopropelidos',
+    description: 'Prefeitura anuncia expansão da infraestrutura com 200km de novas ciclofaixas para patinetes e bicicletas elétricas.',
+    url: 'https://portal.autopropelidos.com.br/noticias/ciclofaixas-sp',
+    source: 'Prefeitura SP',
+    published_at: '2024-03-20T11:00:00Z',
+    category: 'urban_mobility',
+    image_url: 'https://images.unsplash.com/photo-1558454065-b44d4af6671e?w=400&h=300&fit=crop',
+    relevance_score: 75
+  },
+  {
+    id: '5',
+    title: 'Baterias de lítio: nova tecnologia promete maior autonomia',
+    description: 'Fabricantes investem em baterias mais eficientes que podem aumentar autonomia em até 50% para equipamentos elétricos.',
+    url: 'https://portal.autopropelidos.com.br/noticias/baterias-litio',
+    source: 'Tech News',
+    published_at: '2024-04-05T16:45:00Z',
+    category: 'technology',
+    image_url: 'https://images.unsplash.com/photo-1609107665453-4056fad9c68e?w=400&h=300&fit=crop',
+    relevance_score: 72
+  }
+]
+
+const staticMockVideos = [
+  {
+    id: '1',
+    youtube_id: 'dQw4w9WgXcQ',
+    title: 'Resolução 996 do CONTRAN Explicada - Guia Completo',
+    description: 'Entenda completamente a nova regulamentação para equipamentos de mobilidade urbana',
+    channel_name: 'Portal do Trânsito Oficial',
+    thumbnail_url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+    published_at: '2023-06-20T15:30:00Z',
+    view_count: 125000,
+    url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
+  },
+  {
+    id: '2',
+    youtube_id: 'abc123def456',
+    title: 'Como Usar Patinete Elétrico com Segurança',
+    description: 'Dicas essenciais de segurança para circular com patinetes elétricos',
+    channel_name: 'Jornal da Band',
+    thumbnail_url: 'https://img.youtube.com/vi/abc123def456/mqdefault.jpg',
+    published_at: '2023-11-15T09:20:00Z',
+    view_count: 89000,
+    url: 'https://youtube.com/watch?v=abc123def456'
+  },
+  {
+    id: '3',
+    youtube_id: 'xyz789uvw012',
+    title: 'Equipamentos Aprovados pelo CONTRAN 2024',
+    description: 'Lista completa dos equipamentos em conformidade com a regulamentação',
+    channel_name: 'Mobilidade Brasil',
+    thumbnail_url: 'https://img.youtube.com/vi/xyz789uvw012/mqdefault.jpg',
+    published_at: '2024-01-08T14:15:00Z',
+    view_count: 67000,
+    url: 'https://youtube.com/watch?v=xyz789uvw012'
+  }
+]
+
 function formatTimeAgo(dateStr: string) {
   const date = new Date(dateStr)
   const now = new Date()
@@ -37,202 +131,10 @@ function formatTimeAgo(dateStr: string) {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
-export default async function Home() {
-  // Durante o build, usar dados mock para evitar problemas de conexão
-  let latestNews, featuredVideos
-  
-  // Verificar se estamos em ambiente de build
-  const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV === 'production'
-  
-  if (isBuildTime) {
-    // Durante build: usar dados mock diretamente
-    latestNews = [
-      {
-        id: '1',
-        title: 'CONTRAN publica Resolução 996: Nova era para equipamentos autopropelidos',
-        description: 'Resolução regulamenta patinetes elétricos, bicicletas elétricas e ciclomotores no Brasil com novas regras de segurança e circulação.',
-        url: 'https://portal.autopropelidos.com.br/noticias/contran-996',
-        source: 'Portal do Trânsito',
-        published_at: '2023-06-15T10:00:00Z',
-        category: 'regulation',
-        image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
-        relevance_score: 95
-      },
-      {
-        id: '2',
-        title: 'Mercado de patinetes elétricos cresce 150% no Brasil',
-        description: 'Setor de micromobilidade apresenta expansão acelerada com nova regulamentação favorecendo o crescimento sustentável.',
-        url: 'https://portal.autopropelidos.com.br/noticias/mercado-crescimento',
-        source: 'Mobilidade Urbana',
-        published_at: '2024-01-10T14:30:00Z',
-        category: 'technology',
-        image_url: 'https://images.unsplash.com/photo-1558618666-7bd5ad0e9bf5?w=400&h=300&fit=crop',
-        relevance_score: 88
-      },
-      {
-        id: '3',
-        title: 'Acidentes com patinetes elétricos aumentam 40% em 2024',
-        description: 'Dados revelam necessidade de maior conscientização sobre segurança no trânsito e uso adequado de equipamentos.',
-        url: 'https://portal.autopropelidos.com.br/noticias/acidentes-dados',
-        source: 'Segurança no Trânsito',
-        published_at: '2024-02-15T09:15:00Z',
-        category: 'safety',
-        image_url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop',
-        relevance_score: 82
-      },
-      {
-        id: '4',
-        title: 'Novas ciclofaixas em São Paulo para equipamentos autopropelidos',
-        description: 'Prefeitura anuncia expansão da infraestrutura com 200km de novas ciclofaixas para patinetes e bicicletas elétricas.',
-        url: 'https://portal.autopropelidos.com.br/noticias/ciclofaixas-sp',
-        source: 'Prefeitura SP',
-        published_at: '2024-03-20T11:00:00Z',
-        category: 'urban_mobility',
-        image_url: 'https://images.unsplash.com/photo-1558454065-b44d4af6671e?w=400&h=300&fit=crop',
-        relevance_score: 75
-      },
-      {
-        id: '5',
-        title: 'Baterias de lítio: nova tecnologia promete maior autonomia',
-        description: 'Fabricantes investem em baterias mais eficientes que podem aumentar autonomia em até 50% para equipamentos elétricos.',
-        url: 'https://portal.autopropelidos.com.br/noticias/baterias-litio',
-        source: 'Tech News',
-        published_at: '2024-04-05T16:45:00Z',
-        category: 'technology',
-        image_url: 'https://images.unsplash.com/photo-1609107665453-4056fad9c68e?w=400&h=300&fit=crop',
-        relevance_score: 72
-      },
-      {
-        id: '6',
-        title: 'Capacetes inteligentes chegam ao mercado brasileiro',
-        description: 'Nova linha de capacetes com conectividade Bluetooth, GPS integrado e sistema de chamadas de emergência.',
-        url: 'https://portal.autopropelidos.com.br/noticias/capacetes-inteligentes',
-        source: 'Inovação BR',
-        published_at: '2024-04-12T08:30:00Z',
-        category: 'safety',
-        image_url: 'https://images.unsplash.com/photo-1544943410-1c3ecb2fb67d?w=400&h=300&fit=crop',
-        relevance_score: 70
-      },
-      {
-        id: '7',
-        title: 'Sharing de patinetes chega a 50 cidades brasileiras',
-        description: 'Serviços de compartilhamento se expandem pelo interior do país com modelos sustentáveis de negócio.',
-        url: 'https://portal.autopropelidos.com.br/noticias/sharing-expansao',
-        source: 'Mobilidade Brasil',
-        published_at: '2024-04-18T12:15:00Z',
-        category: 'urban_mobility',
-        image_url: 'https://images.unsplash.com/photo-1558618666-c3c5c2b6d31e?w=400&h=300&fit=crop',
-        relevance_score: 68
-      },
-      {
-        id: '8',
-        title: 'Governo federal estuda subsídios para veículos elétricos',
-        description: 'Ministério dos Transportes avalia incentivos fiscais para equipamentos de mobilidade elétrica urbana.',
-        url: 'https://portal.autopropelidos.com.br/noticias/subsidios-governo',
-        source: 'Gov.br',
-        published_at: '2024-04-22T14:20:00Z',
-        category: 'regulation',
-        image_url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
-        relevance_score: 65
-      },
-      {
-        id: '9',
-        title: 'Aplicativo de rotas otimizadas para patinetes é lançado',
-        description: 'Nova ferramenta usa IA para sugerir melhores trajetos considerando ciclofaixas e pontos de recarga.',
-        url: 'https://portal.autopropelidos.com.br/noticias/app-rotas',
-        source: 'StartupBR',
-        published_at: '2024-04-25T09:45:00Z',
-        category: 'technology',
-        image_url: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop',
-        relevance_score: 62
-      },
-      {
-        id: '10',
-        title: 'Curso online gratuito ensina segurança em patinetes',
-        description: 'Plataforma educacional oferece certificação em condução segura de equipamentos autopropelidos.',
-        url: 'https://portal.autopropelidos.com.br/noticias/curso-seguranca',
-        source: 'EduMob',
-        published_at: '2024-04-28T11:30:00Z',
-        category: 'safety',
-        image_url: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=300&fit=crop',
-        relevance_score: 60
-      },
-      {
-        id: '11',
-        title: 'Estações de recarga solar para patinetes em parques',
-        description: 'Iniciativa pioneira instala pontos de recarga movidos a energia solar em parques públicos de São Paulo.',
-        url: 'https://portal.autopropelidos.com.br/noticias/recarga-solar',
-        source: 'EcoSP',
-        published_at: '2024-05-02T15:00:00Z',
-        category: 'technology',
-        image_url: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=300&fit=crop',
-        relevance_score: 58
-      },
-      {
-        id: '12',
-        title: 'Multas por uso irregular de patinetes aumentam 300%',
-        description: 'Fiscalização intensificada resulta em mais autuações por circulação em calçadas e desrespeito às regras.',
-        url: 'https://portal.autopropelidos.com.br/noticias/multas-aumento',
-        source: 'Trânsito Hoje',
-        published_at: '2024-05-05T13:45:00Z',
-        category: 'regulation',
-        image_url: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop',
-        relevance_score: 55
-      }
-    ]
-    
-    featuredVideos = [
-      {
-        id: '1',
-        youtube_id: 'dQw4w9WgXcQ',
-        title: 'Resolução 996 do CONTRAN Explicada - Guia Completo',
-        description: 'Entenda completamente a nova regulamentação para equipamentos de mobilidade urbana',
-        channel_name: 'Portal do Trânsito Oficial',
-        thumbnail_url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
-        published_at: '2023-06-20T15:30:00Z',
-        view_count: 125000,
-        url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
-      },
-      {
-        id: '2',
-        youtube_id: 'abc123def456',
-        title: 'Como Usar Patinete Elétrico com Segurança',
-        description: 'Dicas essenciais de segurança para circular com patinetes elétricos',
-        channel_name: 'Jornal da Band',
-        thumbnail_url: 'https://img.youtube.com/vi/abc123def456/mqdefault.jpg',
-        published_at: '2023-11-15T09:20:00Z',
-        view_count: 89000,
-        url: 'https://youtube.com/watch?v=abc123def456'
-      },
-      {
-        id: '3',
-        youtube_id: 'xyz789uvw012',
-        title: 'Equipamentos Aprovados pelo CONTRAN 2024',
-        description: 'Lista completa dos equipamentos em conformidade com a regulamentação',
-        channel_name: 'Mobilidade Brasil',
-        thumbnail_url: 'https://img.youtube.com/vi/xyz789uvw012/mqdefault.jpg',
-        published_at: '2024-01-08T14:15:00Z',
-        view_count: 67000,
-        url: 'https://youtube.com/watch?v=xyz789uvw012'
-      }
-    ]
-  } else {
-    // Runtime: tentar buscar dados reais dinamicamente
-    try {
-      const { getLatestNews } = await import('@/lib/services/news')
-      const { getLatestVideos } = await import('@/lib/services/youtube')
-      
-      [latestNews, featuredVideos] = await Promise.all([
-        getLatestNews(undefined, 20),
-        getLatestVideos(undefined, 8)
-      ])
-    } catch (error) {
-      console.error('Error loading real data, using fallback:', error)
-      // Fallback para dados mock se houver erro
-      latestNews = []
-      featuredVideos = []
-    }
-  }
+export default function Home() {
+  // Usar dados estáticos para garantir build sem problemas
+  const latestNews = staticMockNews
+  const featuredVideos = staticMockVideos
 
   // Separar notícias por relevância
   const breakingNews = (latestNews || []).filter(news => news.relevance_score >= 90).slice(0, 1)
