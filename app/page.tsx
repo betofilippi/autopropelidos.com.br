@@ -2,10 +2,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, TrendingUp, Clock, ExternalLink, Play, Star, AlertCircle, Zap, Users, Shield, Globe, Eye } from "lucide-react"
-import { getLatestNews } from "@/lib/services/news"
-import { getLatestVideos } from "@/lib/services/youtube"
 import Link from "next/link"
 import Image from "next/image"
+
+// Import services only in non-production builds to avoid Supabase issues
+let getLatestNews: any = null
+let getLatestVideos: any = null
+
+if (process.env.NODE_ENV !== 'production' || typeof window !== 'undefined') {
+  try {
+    const newsService = require("@/lib/services/news")
+    const youtubeService = require("@/lib/services/youtube")
+    getLatestNews = newsService.getLatestNews
+    getLatestVideos = youtubeService.getLatestVideos
+  } catch (error) {
+    console.warn('Failed to load services:', error)
+  }
+}
 
 // Categorias e suas cores
 const categoryColors = {
@@ -42,7 +55,7 @@ export default async function Home() {
   let latestNews, featuredVideos
   
   if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {
-    // Build estático - usar dados mock diretamente
+    // Build estático - usar dados mock diretamente (evita carregar Supabase)
     latestNews = [
       {
         id: '1',
@@ -114,14 +127,20 @@ export default async function Home() {
       }
     ]
   } else {
-    // Runtime - tentar buscar dados dinâmicos
-    try {
-      [latestNews, featuredVideos] = await Promise.all([
-        getLatestNews(undefined, 20),
-        getLatestVideos(undefined, 8)
-      ])
-    } catch (error) {
-      console.error('Error loading content, using fallback:', error)
+    // Runtime - tentar buscar dados dinâmicos apenas se as funções estiverem disponíveis
+    if (getLatestNews && getLatestVideos) {
+      try {
+        [latestNews, featuredVideos] = await Promise.all([
+          getLatestNews(undefined, 20),
+          getLatestVideos(undefined, 8)
+        ])
+      } catch (error) {
+        console.error('Error loading content, using fallback:', error)
+        latestNews = []
+        featuredVideos = []
+      }
+    } else {
+      // Serviços não disponíveis - usar dados mock
       latestNews = []
       featuredVideos = []
     }
