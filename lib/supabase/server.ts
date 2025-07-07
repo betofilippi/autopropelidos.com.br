@@ -3,16 +3,19 @@ import { cookies } from 'next/headers'
 import type { Database } from './database.types'
 
 export async function createClient() {
-  // Durante o build no Vercel, usar valores dummy se as variáveis não estiverem configuradas
+  // Durante o build, sempre usar mock client
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    // Durante o build estático, não tentar conectar ao Supabase
+    throw new Error('Supabase disabled during static generation - using mock data')
+  }
+
+  // Valores de ambiente com fallback para desenvolvimento
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co'
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_anon_key'
   
-  // Se usar valores dummy, não conectar realmente
+  // Se não tiver variáveis configuradas, falhar para usar mock data
   if (supabaseUrl === 'https://dummy.supabase.co' || supabaseKey === 'dummy_anon_key') {
-    // Durante o build, falha silenciosamente para usar fallback
-    if (typeof window === 'undefined') {
-      throw new Error('Supabase disabled during build process - using fallback data')
-    }
+    throw new Error('Supabase environment not configured - using fallback mock data')
   }
 
   const cookieStore = await cookies()
