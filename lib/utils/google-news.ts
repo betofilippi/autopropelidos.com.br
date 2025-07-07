@@ -338,14 +338,4 @@ ${eligibleNews.map(news => {
   return sitemap
 }
 
-export {
-  GOOGLE_NEWS_CONFIG,
-  isEligibleForGoogleNews,
-  generateGoogleNewsMetadata,
-  optimizeNewsTitle,
-  optimizeNewsDescription,
-  generateOptimizedKeywords,
-  validateGoogleNewsCompliance,
-  generateGoogleNewsReport,
-  generatePublisherCenterSitemap
-}
+// Exports já feitos individualmente acima

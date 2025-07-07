@@ -44,7 +44,7 @@ export {
   useGestures,
   useScrollDetection,
   usePerformanceMonitoring
-} from '../hooks/use-mobile-advanced'
+} from '../../hooks/use-mobile-advanced'
 
 // PWA
 export {

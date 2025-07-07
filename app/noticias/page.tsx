@@ -10,8 +10,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for mobile components (client-side only)
-const MobileNewsPage = dynamic(() => import('@/components/mobile/mobile-news-page'), {
-  ssr: false,
+const MobileNewsPageClient = dynamic(() => import('@/components/mobile/mobile-news-page-client'), {
   loading: () => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -111,7 +110,7 @@ export default async function NoticiasPage() {
     <>
       {/* Mobile-first experience */}
       <div className="block lg:hidden">
-        <MobileNewsPage
+        <MobileNewsPageClient
           initialNews={transformedNews}
           onLoadMore={loadMoreNews}
           hasMore={true}

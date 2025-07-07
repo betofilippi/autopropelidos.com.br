@@ -1,4 +1,4 @@
-import { createClient } from 'redis'
+// import { createClient } from 'redis' // Temporariamente comentado para usar apenas cache local
 
 interface CacheOptions {
   ttl?: number // Time to live in seconds
@@ -47,31 +47,32 @@ export class CacheService {
 
   private async initializeRedis() {
     try {
-      if (process.env.REDIS_URL) {
-        this.redis = createClient({
-          url: process.env.REDIS_URL,
-          socket: {
-            connectTimeout: 5000,
-            lazyConnect: true
-          }
-        })
+      // Redis temporariamente desabilitado - usando apenas cache local
+      if (false && process.env.REDIS_URL) {
+        // this.redis = createClient({
+        //   url: process.env.REDIS_URL,
+        //   socket: {
+        //     connectTimeout: 5000,
+        //     lazyConnect: true
+        //   }
+        // })
 
-        this.redis.on('error', (err: any) => {
-          console.error('Redis connection error:', err)
-          this.isRedisConnected = false
-        })
+        // this.redis.on('error', (err: any) => {
+        //   console.error('Redis connection error:', err)
+        //   this.isRedisConnected = false
+        // })
 
-        this.redis.on('connect', () => {
-          console.log('Redis connected successfully')
-          this.isRedisConnected = true
-        })
+        // this.redis.on('connect', () => {
+        //   console.log('Redis connected successfully')
+        //   this.isRedisConnected = true
+        // })
 
-        this.redis.on('disconnect', () => {
-          console.log('Redis disconnected')
-          this.isRedisConnected = false
-        })
+        // this.redis.on('disconnect', () => {
+        //   console.log('Redis disconnected')
+        //   this.isRedisConnected = false
+        // })
 
-        await this.redis.connect()
+        // await this.redis.connect()
       }
     } catch (error) {
       console.error('Failed to initialize Redis:', error)
