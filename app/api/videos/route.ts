@@ -3,13 +3,23 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const limit = searchParams.get('limit') || '10'
-    const offset = searchParams.get('offset') || '0'
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const offset = parseInt(searchParams.get('offset') || '0')
     const category = searchParams.get('category')
     
-    // Use the CLI data fetching approach since direct client is having issues
-    // This data was fetched from "autopropelidos.com.br" schema
-    const videosData = [
+    // Import videos service
+    const { getLatestVideos } = await import('@/lib/services/youtube')
+    
+    // Try to get real data first, fallback to mock if needed
+    let videosData = []
+    try {
+      videosData = await getLatestVideos(category || undefined, limit + offset)
+      // Apply offset after fetching
+      videosData = videosData.slice(offset, offset + limit)
+    } catch (error) {
+      console.error('Error fetching real videos, using fallback:', error)
+      // Fallback to mock data
+      videosData = [
       {
         id: 2,
         youtube_id: "dQw4w9WgXcQ",
@@ -101,26 +111,24 @@ export async function GET(request: NextRequest) {
         updated_at: "2025-07-05T05:59:51.090Z"
       }
     ]
-    
-    // Filter by category if provided
-    let filteredVideos = videosData
-    if (category) {
-      filteredVideos = videosData.filter(video => video.category === category)
+      
+      // Filter by category if provided
+      if (category) {
+        videosData = videosData.filter(video => video.category === category)
+      }
+      
+      // Apply offset
+      videosData = videosData.slice(offset, offset + limit)
     }
-    
-    // Apply pagination
-    const startIndex = parseInt(offset)
-    const endIndex = startIndex + parseInt(limit)
-    const paginatedVideos = filteredVideos.slice(startIndex, endIndex)
     
     return NextResponse.json({
       success: true,
-      data: paginatedVideos,
+      data: videosData,
       pagination: {
-        total: filteredVideos.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        hasMore: endIndex < filteredVideos.length
+        total: videosData.length,
+        limit: limit,
+        offset: offset,
+        hasMore: videosData.length === limit
       }
     })
   } catch (error) {

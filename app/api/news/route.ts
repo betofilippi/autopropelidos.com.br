@@ -3,13 +3,23 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const limit = searchParams.get('limit') || '10'
-    const offset = searchParams.get('offset') || '0'
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const offset = parseInt(searchParams.get('offset') || '0')
     const category = searchParams.get('category')
     
-    // Use the CLI data fetching approach since direct client is having issues
-    // This data was fetched from "autopropelidos.com.br" schema
-    const newsData = [
+    // Import news service
+    const { getLatestNews } = await import('@/lib/services/news')
+    
+    // Try to get real data first, fallback to mock if needed
+    let newsData = []
+    try {
+      newsData = await getLatestNews(category || undefined, limit + offset)
+      // Apply offset after fetching
+      newsData = newsData.slice(offset, offset + limit)
+    } catch (error) {
+      console.error('Error fetching real news, using fallback:', error)
+      // Fallback to mock data
+      newsData = [
       {
         id: 2,
         title: "Resolução 996 do CONTRAN: O que Muda para Ciclomotores",
@@ -91,26 +101,24 @@ export async function GET(request: NextRequest) {
         updated_at: "2025-07-05T05:48:14.927Z"
       }
     ]
-    
-    // Filter by category if provided
-    let filteredNews = newsData
-    if (category) {
-      filteredNews = newsData.filter(news => news.category === category)
+      
+      // Filter by category if provided
+      if (category) {
+        newsData = newsData.filter(news => news.category === category)
+      }
+      
+      // Apply offset
+      newsData = newsData.slice(offset, offset + limit)
     }
-    
-    // Apply pagination
-    const startIndex = parseInt(offset)
-    const endIndex = startIndex + parseInt(limit)
-    const paginatedNews = filteredNews.slice(startIndex, endIndex)
     
     return NextResponse.json({
       success: true,
-      data: paginatedNews,
+      data: newsData,
       pagination: {
-        total: filteredNews.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        hasMore: endIndex < filteredNews.length
+        total: newsData.length,
+        limit: limit,
+        offset: offset,
+        hasMore: newsData.length === limit
       }
     })
   } catch (error) {

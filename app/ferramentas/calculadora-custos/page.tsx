@@ -211,7 +211,6 @@ export default function CalculadoraCustos() {
                           step="0.1"
                           placeholder="10"
                           className="w-full"
-                          {...register('dailyDistance', { valueAsNumber: true })}
                         />
                       </div>
 
@@ -224,7 +223,6 @@ export default function CalculadoraCustos() {
                           max="7"
                           placeholder="5"
                           className="w-full"
-                          {...register('daysPerWeek', { valueAsNumber: true })}
                         />
                       </div>
 
@@ -237,7 +235,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="0.75"
                           className="w-full"
-                          {...register('electricityCost', { valueAsNumber: true })}
                         />
                       </div>
                     </div>
@@ -252,7 +249,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="200.00"
                           className="w-full"
-                          {...register('annualMaintenance', { valueAsNumber: true })}
                         />
                       </div>
 
@@ -265,7 +261,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="150.00"
                           className="w-full"
-                          {...register('insuranceCost', { valueAsNumber: true })}
                         />
                         <p className="text-xs text-gray-500">
                           Opcional: seguro contra roubo/danos
@@ -281,7 +276,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="300.00"
                           className="w-full"
-                          {...register('accessoriesCost', { valueAsNumber: true })}
                         />
                         <p className="text-xs text-gray-500">
                           Capacete, cadeado, luzes, etc.
@@ -318,7 +312,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="4.40"
                           className="w-full"
-                          {...register('busTicketPrice', { valueAsNumber: true })}
                         />
                       </div>
 
@@ -330,7 +323,6 @@ export default function CalculadoraCustos() {
                           min="0"
                           placeholder="2"
                           className="w-full"
-                          {...register('dailyTrips', { valueAsNumber: true })}
                         />
                       </div>
                     </div>
@@ -350,7 +342,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="0.50"
                           className="w-full"
-                          {...register('fuelCost', { valueAsNumber: true })}
                         />
                       </div>
 
@@ -363,7 +354,6 @@ export default function CalculadoraCustos() {
                           step="0.01"
                           placeholder="200.00"
                           className="w-full"
-                          {...register('parkingCost', { valueAsNumber: true })}
                         />
                       </div>
                     </div>
@@ -535,8 +525,7 @@ export default function CalculadoraCustos() {
                 </div>
               </CardContent>
             </Card>
-            </div>
-          )}
+          </div>
 
           {/* Additional Information */}
           <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">

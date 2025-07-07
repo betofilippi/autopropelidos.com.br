@@ -5,20 +5,9 @@ import { ArrowRight, Clock, ExternalLink, Play, FileText, Shield, Zap, TrendingU
 import Link from "next/link"
 import Image from "next/image"
 
-// Import services only in non-production builds to avoid Supabase issues
-let getLatestNews: any = null
-let getLatestVideos: any = null
-
-if (process.env.NODE_ENV !== 'production' || typeof window !== 'undefined') {
-  try {
-    const newsService = require("@/lib/services/news")
-    const youtubeService = require("@/lib/services/youtube")
-    getLatestNews = newsService.getLatestNews
-    getLatestVideos = youtubeService.getLatestVideos
-  } catch (error) {
-    console.warn('Failed to load services:', error)
-  }
-}
+// Import services safely
+import { getLatestNews } from "@/lib/services/news"
+import { getLatestVideos } from "@/lib/services/youtube"
 
 // Paleta de cores Slate/Zinc
 const categoryColors = {
@@ -51,11 +40,14 @@ function formatTimeAgo(dateStr: string) {
 }
 
 export default async function Home() {
-  // Durante o build (processo estático), sempre usar dados mock
+  // Durante o build, usar dados mock para evitar problemas de conexão
   let latestNews, featuredVideos
   
-  if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {
-    // Build estático - usar dados mock diretamente (evita carregar Supabase)
+  // Verificar se estamos em ambiente de build
+  const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV === 'production'
+  
+  if (isBuildTime) {
+    // Durante build: usar dados mock diretamente
     latestNews = [
       {
         id: '1',
@@ -224,56 +216,18 @@ export default async function Home() {
         published_at: '2024-01-08T14:15:00Z',
         view_count: 67000,
         url: 'https://youtube.com/watch?v=xyz789uvw012'
-      },
-      {
-        id: '4',
-        youtube_id: 'mno345pqr678',
-        title: 'Manutenção Preventiva em Patinetes Elétricos',
-        description: 'Como manter seu equipamento em perfeitas condições de uso',
-        channel_name: 'TechMob',
-        thumbnail_url: 'https://img.youtube.com/vi/mno345pqr678/mqdefault.jpg',
-        published_at: '2024-02-12T10:45:00Z',
-        view_count: 45000,
-        url: 'https://youtube.com/watch?v=mno345pqr678'
-      },
-      {
-        id: '5',
-        youtube_id: 'stu901vwx234',
-        title: 'Escolhendo o Capacete Ideal para Patinete',
-        description: 'Guia completo para escolher equipamentos de proteção adequados',
-        channel_name: 'Segurança Total',
-        thumbnail_url: 'https://img.youtube.com/vi/stu901vwx234/mqdefault.jpg',
-        published_at: '2024-03-05T16:20:00Z',
-        view_count: 38000,
-        url: 'https://youtube.com/watch?v=stu901vwx234'
-      },
-      {
-        id: '6',
-        youtube_id: 'def567ghi890',
-        title: 'Infraestrutura Ciclável nas Grandes Cidades',
-        description: 'Análise das melhores práticas urbanas para mobilidade sustentável',
-        channel_name: 'Urbano BR',
-        thumbnail_url: 'https://img.youtube.com/vi/def567ghi890/mqdefault.jpg',
-        published_at: '2024-03-18T12:30:00Z',
-        view_count: 52000,
-        url: 'https://youtube.com/watch?v=def567ghi890'
       }
     ]
   } else {
-    // Runtime - tentar buscar dados dinâmicos apenas se as funções estiverem disponíveis
-    if (getLatestNews && getLatestVideos) {
-      try {
-        [latestNews, featuredVideos] = await Promise.all([
-          getLatestNews(undefined, 20),
-          getLatestVideos(undefined, 8)
-        ])
-      } catch (error) {
-        console.error('Error loading content, using fallback:', error)
-        latestNews = []
-        featuredVideos = []
-      }
-    } else {
-      // Serviços não disponíveis - usar dados mock
+    // Runtime: tentar buscar dados reais
+    try {
+      [latestNews, featuredVideos] = await Promise.all([
+        getLatestNews(undefined, 20),
+        getLatestVideos(undefined, 8)
+      ])
+    } catch (error) {
+      console.error('Error loading real data, using fallback:', error)
+      // Fallback para dados mock se houver erro
       latestNews = []
       featuredVideos = []
     }
