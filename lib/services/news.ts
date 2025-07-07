@@ -81,8 +81,9 @@ export async function aggregateNews(): Promise<{ success: boolean; processed: nu
   }
 
   try {
-    // Durante o build, não tenta conectar ao Supabase
-    if (typeof window === 'undefined') {
+    // Durante o build estático (produção), não tenta conectar ao Supabase
+    // Permite em desenvolvimento local
+    if (typeof window === 'undefined' && process.env.NODE_ENV === 'production' && !process.env.NEWS_API_KEY) {
       return { success: true, processed: 0, errors: ['Build time - skipping database operations'] }
     }
     
