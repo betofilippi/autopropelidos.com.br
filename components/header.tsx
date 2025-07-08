@@ -28,17 +28,14 @@ export default function Header() {
               <NavigationMenuContent>
                 <div className="grid gap-3 p-6 w-[500px] lg:w-[600px] lg:grid-cols-2">
                   <div className="row-span-3">
-                    <NavigationMenuLink asChild>
-                      <Link
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-500 to-blue-600 p-6 no-underline outline-none focus:shadow-md text-white"
-                        href="/resolucao-996"
-                      >
-                        <div className="mb-2 mt-4 text-lg font-medium">Resolução 996</div>
-                        <p className="text-sm leading-tight text-blue-100">Entenda a nova regulamentação do CONTRAN</p>
-                      </Link>
-                    </NavigationMenuLink>
+                    <Link
+                      className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-500 to-blue-600 p-6 no-underline outline-none focus:shadow-md text-white hover:bg-gradient-to-b hover:from-blue-600 hover:to-blue-700 transition-colors"
+                      href="/resolucao-996"
+                    >
+                      <div className="mb-2 mt-4 text-lg font-medium">Resolução 996</div>
+                      <p className="text-sm leading-tight text-blue-100">Entenda a nova regulamentação do CONTRAN</p>
+                    </Link>
                   </div>
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/categoria/legislacao"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -48,8 +45,6 @@ export default function Header() {
                         Leis e regulamentações atualizadas
                       </p>
                     </Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/categoria/mercado"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -59,8 +54,6 @@ export default function Header() {
                         Tendências e análises do setor
                       </p>
                     </Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/categoria/tecnologia"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -70,7 +63,6 @@ export default function Header() {
                         Inovações e novidades técnicas
                       </p>
                     </Link>
-                  </NavigationMenuLink>
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
@@ -79,7 +71,6 @@ export default function Header() {
               <NavigationMenuTrigger>Guias</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid gap-3 p-4 w-[400px]">
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/guias/iniciante"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -89,8 +80,6 @@ export default function Header() {
                         Primeiros passos com equipamentos autopropelidos
                       </p>
                     </Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/guias/seguranca"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -100,8 +89,6 @@ export default function Header() {
                         Dicas para circular com segurança
                       </p>
                     </Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink asChild>
                     <Link
                       href="/guias/manutencao"
                       className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
@@ -111,7 +98,6 @@ export default function Header() {
                         Cuidados com seu equipamento
                       </p>
                     </Link>
-                  </NavigationMenuLink>
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
