@@ -87,7 +87,39 @@ const CommandItem = React.forwardRef<
 ))
 CommandItem.displayName = 'CommandItem'
 
-const CommandDialog = Command
+interface CommandDialogProps extends React.HTMLAttributes<HTMLDivElement> {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  children: React.ReactNode
+}
+
+const CommandDialog = React.forwardRef<HTMLDivElement, CommandDialogProps>(
+  ({ open, onOpenChange, children, className, ...props }, ref) => {
+    if (!open) return null
+    
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "fixed inset-0 z-50 bg-black/80 flex items-start justify-center pt-[20vh]",
+          className
+        )}
+        onClick={() => onOpenChange?.(false)}
+        {...props}
+      >
+        <div
+          className="w-full max-w-lg bg-background rounded-lg shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Command className="rounded-lg border shadow-md">
+            {children}
+          </Command>
+        </div>
+      </div>
+    )
+  }
+)
+CommandDialog.displayName = 'CommandDialog'
 const CommandSeparator = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
