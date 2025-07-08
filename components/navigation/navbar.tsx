@@ -142,7 +142,6 @@ export function Navbar() {
                           >
                             {item.children.map((child) => (
                               <li key={child.title} role="none">
-                                <NavigationMenuLink asChild>
                                   <Link
                                     href={child.href}
                                     className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:ring-2 focus:ring-blue-500"
@@ -157,7 +156,6 @@ export function Navbar() {
                                       {child.description}
                                     </p>
                                   </Link>
-                                </NavigationMenuLink>
                               </li>
                             ))}
                           </ul>
