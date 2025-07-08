@@ -40,7 +40,7 @@ const CardTitle = React.forwardRef<
     level?: 1 | 2 | 3 | 4 | 5 | 6
   }
 >(({ className, level = 3, ...props }, ref) => {
-  const Component = `h${level}` as keyof JSX.IntrinsicElements
+  const Component = `h${level}` as React.ElementType
   return (
     <Component
       ref={ref}
