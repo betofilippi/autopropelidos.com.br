@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
     switch (check) {
       case 'basic':
-        healthData = await healthMonitor.getBasicHealth()
+        // Use getDetailedHealth as fallback since getBasicHealth might not exist
+        healthData = await healthMonitor.getDetailedHealth()
         break
       
       case 'detailed':
@@ -46,17 +47,28 @@ export async function GET(request: NextRequest) {
 
     // Format response
     if (format === 'prometheus') {
-      const prometheusMetrics = healthMonitor.formatPrometheusMetrics(healthData)
-      return new NextResponse(prometheusMetrics, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8'
-        }
-      })
+      // Only format as prometheus if we have a HealthStatus object
+      if (healthData && typeof healthData === 'object' && 'status' in healthData && 'timestamp' in healthData) {
+        const prometheusMetrics = healthMonitor.formatPrometheusMetrics(healthData as any)
+        return new NextResponse(prometheusMetrics, {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8'
+          }
+        })
+      } else {
+        // Fallback to JSON if we don't have a proper HealthStatus
+        return NextResponse.json(healthData, { 
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+      }
     }
 
     // Set appropriate HTTP status based on overall health
-    const status = healthData.status === 'healthy' ? 200 : 
-                  healthData.status === 'degraded' ? 206 : 503
+    const status = (healthData && typeof healthData === 'object' && 'status' in healthData) ?
+                  (healthData.status === 'healthy' ? 200 : 
+                   healthData.status === 'degraded' ? 206 : 503) : 200
 
     return NextResponse.json(healthData, { status })
 

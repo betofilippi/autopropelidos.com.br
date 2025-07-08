@@ -54,19 +54,11 @@ export const pageTransition = {
   initial: { opacity: 0, y: 20 },
   animate: { 
     opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
+    y: 0
   },
   exit: { 
     opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.2,
-      ease: "easeIn"
-    }
+    y: -20
   }
 };
 
@@ -74,11 +66,7 @@ export const pageTransition = {
 export const cardHover = {
   rest: { scale: 1 },
   hover: { 
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut"
-    }
+    scale: 1.02
   },
   tap: { scale: 0.98 }
 };
@@ -87,11 +75,7 @@ export const cardHover = {
 export const buttonHover = {
   rest: { scale: 1 },
   hover: { 
-    scale: 1.05,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut"
-    }
+    scale: 1.05
   },
   tap: { scale: 0.95 }
 };
@@ -134,30 +118,11 @@ export const accordionAnimation = {
   initial: { height: 0, opacity: 0 },
   animate: { 
     height: "auto", 
-    opacity: 1,
-    transition: {
-      height: {
-        duration: 0.3,
-        ease: "easeOut"
-      },
-      opacity: {
-        duration: 0.2,
-        delay: 0.1
-      }
-    }
+    opacity: 1
   },
   exit: { 
     height: 0, 
-    opacity: 0,
-    transition: {
-      height: {
-        duration: 0.3,
-        ease: "easeIn"
-      },
-      opacity: {
-        duration: 0.2
-      }
-    }
+    opacity: 0
   }
 };
 
@@ -166,12 +131,7 @@ export const listItemAnimation = {
   initial: { opacity: 0, x: -20 },
   animate: (i: number) => ({
     opacity: 1,
-    x: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.3,
-      ease: "easeOut"
-    }
+    x: 0
   })
 };
 
@@ -199,10 +159,6 @@ export const focusRing = {
   initial: { scale: 0.95, opacity: 0 },
   focus: { 
     scale: 1, 
-    opacity: 1,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut"
-    }
+    opacity: 1
   }
 };

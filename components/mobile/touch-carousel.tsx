@@ -44,7 +44,7 @@ export function TouchCarousel({
   const [isPlaying, setIsPlaying] = useState(autoPlay)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const autoPlayRef = useRef<NodeJS.Timeout>()
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
   
   const x = useMotionValue(0)
   const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5])

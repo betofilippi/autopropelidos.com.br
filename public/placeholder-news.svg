@@ -1,0 +1,12 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f1f5f9"/>
+  <rect x="50" y="50" width="700" height="400" fill="#e2e8f0" rx="8"/>
+  <rect x="100" y="100" width="600" height="60" fill="#cbd5e1" rx="4"/>
+  <rect x="100" y="180" width="450" height="20" fill="#94a3b8" rx="2"/>
+  <rect x="100" y="220" width="520" height="20" fill="#94a3b8" rx="2"/>
+  <rect x="100" y="260" width="380" height="20" fill="#94a3b8" rx="2"/>
+  <rect x="100" y="320" width="200" height="40" fill="#3b82f6" rx="4"/>
+  <path d="M380 480L400 460L420 480L440 460L460 480L480 460L500 480" stroke="#64748b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="540" text-anchor="middle" fill="#64748b" font-family="Arial, sans-serif" font-size="24" font-weight="bold">NOTÍCIAS</text>
+  <text x="400" y="570" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="16">Autopropelidos</text>
+</svg>

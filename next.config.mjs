@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Build optimizations
+  // Build optimizations - stricter for production
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.NODE_ENV === 'development',
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === 'development',
   },
   
   // Performance optimizations
@@ -13,8 +13,9 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Image optimization
+  // Image optimization - optimized for hybrid mode
   images: {
+    unoptimized: false,
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -113,92 +114,92 @@ const nextConfig = {
     return config
   },
   
-  // Headers for security and performance
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()'
-          }
-        ]
-      },
-      {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, s-maxage=3600'
-          }
-        ]
-      },
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      },
-      {
-        source: '/fonts/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      },
-      {
-        source: '/images/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      }
-    ]
-  },
+  // Headers disabled for static export
+  // async headers() {
+  //   return [
+  //     {
+  //       source: '/:path*',
+  //       headers: [
+  //         {
+  //           key: 'X-DNS-Prefetch-Control',
+  //           value: 'on'
+  //         },
+  //         {
+  //           key: 'X-XSS-Protection',
+  //           value: '1; mode=block'
+  //         },
+  //         {
+  //           key: 'X-Frame-Options',
+  //           value: 'DENY'
+  //         },
+  //         {
+  //           key: 'X-Content-Type-Options',
+  //           value: 'nosniff'
+  //         },
+  //         {
+  //           key: 'Referrer-Policy',
+  //           value: 'strict-origin-when-cross-origin'
+  //         },
+  //         {
+  //           key: 'Permissions-Policy',
+  //           value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       source: '/api/:path*',
+  //       headers: [
+  //         {
+  //           key: 'Cache-Control',
+  //           value: 'public, max-age=3600, s-maxage=3600'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       source: '/_next/static/:path*',
+  //       headers: [
+  //         {
+  //           key: 'Cache-Control',
+  //           value: 'public, max-age=31536000, immutable'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       source: '/fonts/:path*',
+  //       headers: [
+  //         {
+  //           key: 'Cache-Control',
+  //           value: 'public, max-age=31536000, immutable'
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       source: '/images/:path*',
+  //       headers: [
+  //         {
+  //           key: 'Cache-Control',
+  //           value: 'public, max-age=31536000, immutable'
+  //         }
+  //       ]
+  //     }
+  //   ]
+  // },
   
-  // Redirects for SEO
-  async redirects() {
-    return [
-      {
-        source: '/home',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/index',
-        destination: '/',
-        permanent: true,
-      }
-    ]
-  },
+  // Redirects disabled for static export
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/home',
+  //       destination: '/',
+  //       permanent: true,
+  //     },
+  //     {
+  //       source: '/index',
+  //       destination: '/',
+  //       permanent: true,
+  //     }
+  //   ]
+  // },
   
   // Compression
   compress: true,
@@ -206,10 +207,10 @@ const nextConfig = {
   // Power by header
   poweredByHeader: false,
   
-  // Trailing slash
-  trailingSlash: false,
+  // Trailing slash - required for static export
+  trailingSlash: true,
   
-  // Output configuration
+  // Output configuration - standalone for hybrid mode
   output: 'standalone',
   
   // Environment variables

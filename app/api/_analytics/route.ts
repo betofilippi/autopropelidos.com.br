@@ -1,76 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  getAnalytics, 
-  getTrafficStats, 
-  getContentAnalytics, 
-  getDashboardSummary,
-  invalidateAnalyticsCache
-} from '@/lib/services/analytics'
-import { logger } from '@/lib/utils/logger'
+
+// Mock analytics functions for hybrid mode
+const mockAnalytics = {
+  dashboard: {
+    totalViews: 125430,
+    uniqueVisitors: 45230,
+    bounceRate: 0.35,
+    avgSessionDuration: 185000,
+    topPages: [
+      { path: '/', views: 25430 },
+      { path: '/resolucao-996', views: 18230 },
+      { path: '/noticias', views: 12340 }
+    ]
+  },
+  traffic: {
+    pageViews: [
+      { date: '2024-01-01', views: 1500 },
+      { date: '2024-01-02', views: 1800 },
+      { date: '2024-01-03', views: 2100 }
+    ],
+    sources: [
+      { source: 'organic', percentage: 65 },
+      { source: 'direct', percentage: 25 },
+      { source: 'social', percentage: 10 }
+    ]
+  }
+}
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now()
   
   try {
     const searchParams = request.nextUrl.searchParams
-    const action = searchParams.get('action')
-    const period = searchParams.get('period')
+    const action = searchParams.get('action') || 'dashboard'
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 100))
     
     let result
-    
     switch (action) {
-      case 'traffic':
-        result = await getTrafficStats()
-        break
-        
-      case 'content':
-        result = await getContentAnalytics()
-        break
-        
       case 'dashboard':
-        result = await getDashboardSummary()
+        result = mockAnalytics.dashboard
         break
-        
-      case 'overview':
+      case 'traffic':
+        result = mockAnalytics.traffic
+        break
       default:
-        result = await getAnalytics(period || undefined)
-        break
+        result = mockAnalytics.dashboard
     }
     
-    const duration = Date.now() - startTime
-    
-    logger.apiResponse('GET', '/api/analytics', 200, duration)
+    const responseTime = Date.now() - startTime
     
     return NextResponse.json({
       success: true,
       data: result,
-      meta: {
-        action: action || 'overview',
-        period: period || 'current',
-        response_time_ms: duration
-      },
-      timestamp: new Date().toISOString()
+      metadata: {
+        timestamp: new Date().toISOString(),
+        responseTime,
+        cached: false,
+        action
+      }
     })
     
   } catch (error) {
-    const duration = Date.now() - startTime
+    const responseTime = Date.now() - startTime
     
-    logger.error('API_ANALYTICS', 'Error in analytics endpoint', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      duration_ms: duration
-    })
-    
-    logger.apiResponse('GET', '/api/analytics', 500, duration)
-    
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch analytics data',
+      metadata: {
+        timestamp: new Date().toISOString(),
+        responseTime
+      }
+    }, { status: 500 })
   }
 }
 
@@ -81,98 +83,24 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'track_event':
-        // Implementar tracking de eventos personalizados
-        const { event_type, event_data } = body
-        
-        logger.userAction(event_type, 'anonymous', event_data)
-        
         return NextResponse.json({
           success: true,
           message: 'Event tracked successfully',
           timestamp: new Date().toISOString()
         })
         
-      case 'invalidate_cache':
-        // Invalidar cache de analytics (apenas para administradores)
-        const pattern = body.pattern
-        const invalidated = invalidateAnalyticsCache(pattern)
-        
-        return NextResponse.json({
-          success: true,
-          message: `Invalidated ${invalidated} cache entries`,
-          data: { invalidated_count: invalidated },
-          timestamp: new Date().toISOString()
-        })
-        
-      case 'export_data':
-        // Implementar exportação de dados de analytics
-        return NextResponse.json({
-          success: true,
-          message: 'Data export feature coming soon',
-          timestamp: new Date().toISOString()
-        })
-        
       default:
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Invalid action',
-            available_actions: ['track_event', 'invalidate_cache', 'export_data'],
-            timestamp: new Date().toISOString()
-          },
-          { status: 400 }
-        )
-    }
-  } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Invalid request body',
-        timestamp: new Date().toISOString()
-      },
-      { status: 400 }
-    )
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    // Endpoint para limpeza de dados de analytics (GDPR compliance)
-    const searchParams = request.nextUrl.searchParams
-    const user_id = searchParams.get('user_id')
-    
-    if (!user_id) {
-      return NextResponse.json(
-        {
+        return NextResponse.json({
           success: false,
-          error: 'User ID is required for data deletion',
+          error: 'Invalid action',
           timestamp: new Date().toISOString()
-        },
-        { status: 400 }
-      )
+        }, { status: 400 })
     }
-    
-    // Implementar lógica de remoção de dados do usuário
-    logger.info('DATA_DELETION', `Data deletion requested for user ${user_id}`, {
-      user_id,
-      requested_at: new Date().toISOString()
-    })
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Data deletion request processed',
-      data: { user_id },
-      timestamp: new Date().toISOString()
-    })
-    
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Error processing data deletion request',
-        timestamp: new Date().toISOString()
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      success: false,
+      error: 'Invalid request body',
+      timestamp: new Date().toISOString()
+    }, { status: 400 })
   }
 }

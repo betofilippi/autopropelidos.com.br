@@ -7,7 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build:clean": "rm -rf .next out && npm run build",
+    "build:export": "next build && next export",
+    "deploy": "npm run build:clean && vercel --prod",
+    "deploy:preview": "npm run build:clean && vercel",
+    "sync:news": "curl -X POST http://localhost:3000/api/sync/news",
+    "sync:videos": "curl -X POST http://localhost:3000/api/sync/videos",
+    "sync:all": "npm run sync:news && npm run sync:videos"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.1",
@@ -45,10 +52,10 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.17.0",
     "eslint-config-next": "15.2.4",
-    "postcss": "^8.5.0",
+    "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2"
   }

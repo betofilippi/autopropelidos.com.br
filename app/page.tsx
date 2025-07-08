@@ -5,7 +5,10 @@ import { ArrowRight, Clock, ExternalLink, Play, FileText, Shield, Zap, TrendingU
 import Link from "next/link"
 import Image from "next/image"
 
-// Página estática para evitar problemas de build com Supabase
+// ISR Configuration for dynamic content
+export const revalidate = 1800 // Revalidate every 30 minutes
+
+// Página com ISR para buscar dados dinâmicos
 // Paleta de cores Slate/Zinc
 const categoryColors = {
   regulation: 'bg-slate-100 text-slate-700 border-slate-300',

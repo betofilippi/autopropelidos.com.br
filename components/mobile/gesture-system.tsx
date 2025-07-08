@@ -89,7 +89,7 @@ export function useAdvancedGestures(
   const touchStart = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 })
   const lastTap = useRef<number>(0)
   const tapCount = useRef<number>(0)
-  const longPressTimer = useRef<NodeJS.Timeout>()
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
   const isLongPress = useRef<boolean>(false)
   
   // Multi-touch tracking
@@ -104,21 +104,21 @@ export function useAdvancedGestures(
     }
   }, [mergedConfig.haptic])
 
-  const calculateDistance = (touch1: Touch, touch2: Touch): number => {
+  const calculateDistance = (touch1: Touch | React.Touch, touch2: Touch | React.Touch): number => {
     return Math.hypot(
       touch1.clientX - touch2.clientX,
       touch1.clientY - touch2.clientY
     )
   }
 
-  const calculateAngle = (touch1: Touch, touch2: Touch): number => {
+  const calculateAngle = (touch1: Touch | React.Touch, touch2: Touch | React.Touch): number => {
     return Math.atan2(
       touch2.clientY - touch1.clientY,
       touch2.clientX - touch1.clientX
     ) * 180 / Math.PI
   }
 
-  const handleTouchStart = useCallback((e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent | TouchEvent) => {
     const touch = e.touches[0]
     const now = Date.now()
     
@@ -149,7 +149,7 @@ export function useAdvancedGestures(
         handlers.onLongPress?.({
           type: 'longpress',
           point: { x: touch.clientX, y: touch.clientY },
-          target: e.target
+          target: e.target || undefined
         })
         
         triggerHaptic(50)
@@ -157,7 +157,7 @@ export function useAdvancedGestures(
     }
   }, [handlers, mergedConfig, triggerHaptic])
 
-  const handleTouchMove = useCallback((e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent | TouchEvent) => {
     // Clear long press if moving
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
@@ -173,7 +173,7 @@ export function useAdvancedGestures(
         const currentDistance = calculateDistance(touch1, touch2)
         const scale = currentDistance / initialDistance.current
         
-        if (Math.abs(scale - initialScale.current) > mergedConfig.pinch.threshold) {
+        if (Math.abs(scale - initialScale.current) > (mergedConfig.pinch.threshold || 0.1)) {
           handlers.onPinch?.({
             type: 'pinch',
             scale,
@@ -181,7 +181,7 @@ export function useAdvancedGestures(
               x: (touch1.clientX + touch2.clientX) / 2,
               y: (touch1.clientY + touch2.clientY) / 2
             },
-            target: e.target
+            target: e.target || undefined
           })
           
           initialScale.current = scale
@@ -193,7 +193,7 @@ export function useAdvancedGestures(
         const currentAngle = calculateAngle(touch1, touch2)
         const rotation = currentAngle - initialAngle.current
         
-        if (Math.abs(rotation - initialRotation.current) > mergedConfig.rotate.threshold) {
+        if (Math.abs(rotation - initialRotation.current) > (mergedConfig.rotate.threshold || 0.1)) {
           handlers.onRotate?.({
             type: 'rotate',
             rotation,
@@ -201,7 +201,7 @@ export function useAdvancedGestures(
               x: (touch1.clientX + touch2.clientX) / 2,
               y: (touch1.clientY + touch2.clientY) / 2
             },
-            target: e.target
+            target: e.target || undefined
           })
           
           initialRotation.current = rotation
@@ -210,7 +210,7 @@ export function useAdvancedGestures(
     }
   }, [handlers, mergedConfig])
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent | TouchEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
     }
@@ -226,8 +226,8 @@ export function useAdvancedGestures(
     if (
       mergedConfig.swipe.enabled && 
       !isLongPress.current &&
-      distance > mergedConfig.swipe.threshold &&
-      velocity > mergedConfig.swipe.velocity
+      distance > (mergedConfig.swipe.threshold || 50) &&
+      velocity > (mergedConfig.swipe.velocity || 0.5)
     ) {
       let direction: 'left' | 'right' | 'up' | 'down'
       
@@ -243,7 +243,7 @@ export function useAdvancedGestures(
         velocity,
         distance,
         point: { x: touch.clientX, y: touch.clientY },
-        target: e.target
+        target: e.target || undefined
       })
 
       triggerHaptic(30)
@@ -254,8 +254,8 @@ export function useAdvancedGestures(
     if (
       mergedConfig.tap.enabled &&
       !isLongPress.current &&
-      deltaTime < mergedConfig.tap.maxDelay &&
-      distance < mergedConfig.tap.maxDistance
+      deltaTime < (mergedConfig.tap.maxDelay || 200) &&
+      distance < (mergedConfig.tap.maxDistance || 10)
     ) {
       const now = Date.now()
       const timeSinceLastTap = now - lastTap.current
@@ -268,7 +268,7 @@ export function useAdvancedGestures(
           handlers.onDoubleTap?.({
             type: 'tap',
             point: { x: touch.clientX, y: touch.clientY },
-            target: e.target
+            target: e.target || undefined
           })
           
           triggerHaptic([20, 30, 20])
@@ -283,7 +283,7 @@ export function useAdvancedGestures(
             handlers.onTap?.({
               type: 'tap',
               point: { x: touch.clientX, y: touch.clientY },
-              target: e.target
+              target: e.target || undefined
             })
             
             triggerHaptic(10)
@@ -479,8 +479,8 @@ export function LongPress({
 }: LongPressProps) {
   const [isPressed, setIsPressed] = useState(false)
   const [progress, setProgress] = useState(0)
-  const timerRef = useRef<NodeJS.Timeout>()
-  const intervalRef = useRef<NodeJS.Timeout>()
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const startPress = () => {
     setIsPressed(true)

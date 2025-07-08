@@ -1,0 +1,11 @@
+<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="360" fill="#18181b"/>
+  <rect x="20" y="20" width="600" height="320" fill="#27272a" rx="8"/>
+  <circle cx="320" cy="180" r="40" fill="#52525b"/>
+  <path d="M310 165L335 180L310 195V165Z" fill="#f4f4f5"/>
+  <rect x="50" y="280" width="540" height="4" fill="#3f3f46" rx="2"/>
+  <rect x="50" y="280" width="180" height="4" fill="#ef4444" rx="2"/>
+  <circle cx="230" cy="282" r="6" fill="#ef4444"/>
+  <text x="320" y="320" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="16" font-weight="bold">VÍDEO</text>
+  <text x="320" y="340" text-anchor="middle" fill="#71717a" font-family="Arial, sans-serif" font-size="12">Autopropelidos</text>
+</svg>

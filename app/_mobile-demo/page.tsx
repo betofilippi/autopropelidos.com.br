@@ -8,7 +8,7 @@ import {
   Wifi, 
   Battery, 
   Navigation,
-  TouchIcon,
+  TouchpadIcon,
   Layers,
   Gauge,
   Bell,
@@ -273,7 +273,7 @@ export default function MobileDemoPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <TouchIcon className="w-5 h-5 mr-2" />
+                  <TouchpadIcon className="w-5 h-5 mr-2" />
                   Sistema de Gestos
                 </CardTitle>
               </CardHeader>

@@ -241,7 +241,7 @@ const documents = {
 export default function BibliotecaPage() {
   const allDocuments = [...documents.legislation, ...documents.technical, ...documents.municipal, ...documents.guides, ...documents.studies]
   const totalDownloads = allDocuments.reduce((sum, doc) => sum + doc.downloads, 0)
-  const featuredDocs = allDocuments.filter(doc => doc.featured)
+  const featuredDocs = allDocuments.filter(doc => (doc as any).featured)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

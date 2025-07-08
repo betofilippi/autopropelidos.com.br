@@ -62,8 +62,9 @@ export async function generateStaticParams() {
 }
 
 // Função para gerar metadata dinâmica
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const news = await getNewsBySlug(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const news = await getNewsBySlug(slug)
   
   if (!news) {
     return {
@@ -122,7 +123,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: news.image_url ? [news.image_url] : [],
     },
     alternates: {
-      canonical: `https://autopropelidos.com.br/noticias/${params.slug}`,
+      canonical: `https://autopropelidos.com.br/noticias/${slug}`,
     },
     robots: {
       index: true,
@@ -320,8 +321,9 @@ async function RelatedNews({ newsId }: { newsId: string }) {
   }
 }
 
-export default async function NewsPage({ params }: { params: { slug: string } }) {
-  const news = await getNewsBySlug(params.slug)
+export default async function NewsPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const news = await getNewsBySlug(slug)
 
   if (!news) {
     notFound()

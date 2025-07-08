@@ -140,7 +140,7 @@ export function SwipeCard({
           {/* Left swipe indicator */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
+            style={{ 
               opacity: useTransform(x, [-100, -50, 0], [1, 0.5, 0]),
               scale: useTransform(x, [-100, -50, 0], [1, 0.9, 0.8])
             }}
@@ -152,7 +152,7 @@ export function SwipeCard({
           {/* Right swipe indicator */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
+            style={{ 
               opacity: useTransform(x, [0, 50, 100], [0, 0.5, 1]),
               scale: useTransform(x, [0, 50, 100], [0.8, 0.9, 1])
             }}
@@ -164,7 +164,7 @@ export function SwipeCard({
           {/* Up swipe indicator */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
+            style={{ 
               opacity: useTransform(y, [-100, -50, 0], [1, 0.5, 0]),
               scale: useTransform(y, [-100, -50, 0], [1, 0.9, 0.8])
             }}
@@ -176,7 +176,7 @@ export function SwipeCard({
           {/* Down swipe indicator */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
+            style={{ 
               opacity: useTransform(y, [0, 50, 100], [0, 0.5, 1]),
               scale: useTransform(y, [0, 50, 100], [0.8, 0.9, 1])
             }}

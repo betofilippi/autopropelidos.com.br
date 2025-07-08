@@ -99,31 +99,16 @@ export default function HeroSection() {
     visible: {
       opacity: 1,
       y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 12
-      }
+      scale: 1
     }
   }
 
   const buttonVariants = {
     hover: {
-      scale: 1.05,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
+      scale: 1.05
     },
     tap: {
-      scale: 0.95,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
+      scale: 0.95
     }
   }
 
