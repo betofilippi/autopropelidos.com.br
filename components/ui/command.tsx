@@ -18,19 +18,34 @@ const Command = React.forwardRef<
 ))
 Command.displayName = 'Command'
 
-const CommandInput = React.forwardRef<
-  HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->(({ className, ...props }, ref) => (
-  <input
-    ref={ref}
-    className={cn(
-      "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  />
-))
+interface CommandInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  onValueChange?: (value: string) => void
+}
+
+const CommandInput = React.forwardRef<HTMLInputElement, CommandInputProps>(
+  ({ className, onValueChange, onChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onValueChange) {
+        onValueChange(e.target.value)
+      }
+      if (onChange) {
+        onChange(e)
+      }
+    }
+
+    return (
+      <input
+        ref={ref}
+        onChange={handleChange}
+        className={cn(
+          "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
 CommandInput.displayName = 'CommandInput'
 
 const CommandList = React.forwardRef<
