@@ -87,6 +87,19 @@ const CommandItem = React.forwardRef<
 ))
 CommandItem.displayName = 'CommandItem'
 
+const CommandDialog = Command
+const CommandSeparator = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("h-px bg-border", className)}
+    {...props}
+  />
+))
+CommandSeparator.displayName = 'CommandSeparator'
+
 export {
   Command,
   CommandInput,
@@ -94,4 +107,6 @@ export {
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandDialog,
+  CommandSeparator,
 }
