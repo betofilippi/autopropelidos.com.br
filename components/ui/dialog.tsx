@@ -45,7 +45,7 @@ const DialogContent = React.forwardRef<
       )}
       onOpenAutoFocus={(e) => {
         // Focus the first focusable element or the close button
-        const firstFocusable = e.currentTarget?.querySelector(
+        const firstFocusable = (e.currentTarget as HTMLElement)?.querySelector(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         ) as HTMLElement
         if (firstFocusable) {
