@@ -92,7 +92,7 @@ export function OptimizedImage({
     
     // Check if it's an external URL that might not work with Next.js Image
     try {
-      const url = new URL(imageSrc, 'https://example.com')
+      const url = new URL(String(imageSrc), 'https://example.com')
       return url.hostname !== 'autopropelidos.com.br' && 
              url.hostname !== 'localhost' && 
              !url.pathname.startsWith('/_next/')
