@@ -638,8 +638,8 @@ export class AnalyticsService {
       const predictedScore = this.predictKeywordTrend(history, days)
       const confidence = this.calculatePredictionConfidence(history)
       
-      const trend = predictedScore > currentScore * 1.1 ? 'rising' :
-                   predictedScore < currentScore * 0.9 ? 'falling' : 'stable'
+      const trend = (predictedScore > currentScore * 1.1 ? 'rising' :
+                   predictedScore < currentScore * 0.9 ? 'falling' : 'stable') as 'rising' | 'falling' | 'stable'
       
       predictions.push({
         keyword,
