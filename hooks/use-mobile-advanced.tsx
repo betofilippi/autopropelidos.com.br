@@ -253,8 +253,8 @@ export function useGestures(element: React.RefObject<HTMLElement>) {
 
   const touchStart = useRef({ x: 0, y: 0, time: 0 })
   const touchDistance = useRef(0)
-  const longPressTimer = useRef<NodeJS.Timeout>()
-  const tapTimer = useRef<NodeJS.Timeout>()
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
+  const tapTimer = useRef<NodeJS.Timeout | null>(null)
   const tapCount = useRef(0)
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
