@@ -65,13 +65,13 @@ export class DatabaseOptimizerService {
                            warningIssues > 0 ? 'warning' : 'healthy'
 
       // Calculate average index usage
-      const avgIndexUsage = healthChecks?.find((check: any) => 
+      const avgIndexUsage = checksArray.find((check: any) => 
         check.check_name === 'Index Usage'
       )?.details?.match(/(\d+\.?\d*)%/)?.[1] || '0'
 
       return {
         status: overallStatus,
-        checks: healthChecks?.map((check: any) => ({
+        checks: checksArray.map((check: any) => ({
           name: check.check_name,
           status: check.status,
           details: check.details,
