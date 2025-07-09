@@ -79,7 +79,7 @@ export class AdminService {
       // Additional check against admin users table
       const supabase = createAdminClient()
       const { data: admin } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('admin_users')
         .select('id, permissions, active')
         .eq('id', decoded.adminId)
@@ -356,7 +356,7 @@ export class AdminService {
     try {
       // Update content status
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('content_queue')
         .update({
           status: 'approved',
@@ -384,7 +384,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('content_queue')
         .update({
           status: 'rejected',
@@ -409,7 +409,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('content_queue')
         .update({
           ...updates,
@@ -433,7 +433,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('content_queue')
         .update({
           status: 'scheduled',
@@ -492,7 +492,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('system_settings')
         .upsert({
           ...settings,
@@ -518,7 +518,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from(contentType === 'news' ? 'news' : 'videos')
         .insert({
           ...content,
@@ -542,7 +542,7 @@ export class AdminService {
     
     try {
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('content_queue')
         .delete()
         .eq('id', contentId)
@@ -576,7 +576,7 @@ export class AdminService {
       const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) // 90 days ago
       
       const { count } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('admin_logs')
         .delete()
         .lt('timestamp', cutoffDate.toISOString())
