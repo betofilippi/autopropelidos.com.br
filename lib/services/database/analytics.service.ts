@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Define Analytics types locally
 interface Analytics {
@@ -83,7 +83,7 @@ export interface PageAnalytics {
 }
 
 class AnalyticsService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     if (typeof window === 'undefined') {
       try {
         return createClient()
