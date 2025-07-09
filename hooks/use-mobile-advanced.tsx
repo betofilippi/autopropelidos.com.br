@@ -400,7 +400,7 @@ export function useScrollDetection() {
   })
 
   const lastScrollY = useRef(0)
-  const scrollTimer = useRef<NodeJS.Timeout>()
+  const scrollTimer = useRef<NodeJS.Timeout | null>(null)
 
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY
