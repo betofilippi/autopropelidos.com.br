@@ -485,7 +485,7 @@ export function usePerformanceMonitoring() {
           setMetrics(prev => ({
             ...prev,
             ttfb: navEntry.responseStart - navEntry.requestStart,
-            loadTime: navEntry.loadEventEnd - navEntry.navigationStart
+            loadTime: navEntry.loadEventEnd - navEntry.startTime
           }))
         }
       })
