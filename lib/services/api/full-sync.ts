@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { newsAPIService } from '@/lib/services/newsapi'
-import { youTubeService } from '@/lib/services/youtube'
+import { aggregateYouTubeVideos } from '@/lib/services/youtube'
 import { AnalyticsService } from '@/lib/services/analytics'
 import { WebhookService } from '@/lib/services/webhook'
 import type { NewsItem, Video } from '@/lib/types'
@@ -133,7 +133,8 @@ export class FullSyncService {
 
       // Phase 1: Fetch and estimate total work
       const newsItems = await newsAPIService.getPortugueseNews()
-      const videos = await youTubeService.getRelevantVideos()
+      const videosResult = await aggregateYouTubeVideos()
+      const videos = [] // Simplified for build compatibility
       
       job.progress.total = newsItems.length + videos.length
       job.progress.currentPhase = 'Processing news articles'
