@@ -229,27 +229,7 @@
     @apply bg-gray-100 text-gray-800 border-gray-200;
   }
 
-  /* Text Truncation */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-4 {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+  /* Text Truncation - Now handled by @tailwindcss/line-clamp plugin */
 
   /* Portal Typography */
   .portal-title {
