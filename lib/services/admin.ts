@@ -575,12 +575,19 @@ export class AdminService {
     try {
       const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) // 90 days ago
       
+      // First count the records to be deleted
       const { count } = await supabase
+        .schema('public')
+        .from('admin_logs')
+        .select('id', { count: 'exact', head: true })
+        .lt('timestamp', cutoffDate.toISOString())
+      
+      // Then delete them
+      await supabase
         .schema('public')
         .from('admin_logs')
         .delete()
         .lt('timestamp', cutoffDate.toISOString())
-        .select('id', { count: 'exact', head: true })
 
       await this.logAdminAction('cleanup_logs', `Cleaned up ${count || 0} old log entries`)
 
