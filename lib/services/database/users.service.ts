@@ -1,4 +1,19 @@
-import { createClient, createServerSupabaseClient, type User, type UserInsert, type UserUpdate } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+
+// Define User types locally since they don't exist in our schema
+interface User {
+  id: string
+  email: string
+  name?: string
+  avatar_url?: string
+  preferences?: any
+  notification_settings?: any
+  created_at: string
+}
+
+type UserInsert = Omit<User, 'id' | 'created_at'>
+type UserUpdate = Partial<UserInsert>
+
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface UserPreferences {
@@ -38,7 +53,7 @@ class UserService {
   private getClient(): SupabaseClient {
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }

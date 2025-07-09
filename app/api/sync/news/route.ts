@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NewsItem } from '@/lib/types/services'
+import { newsAPIService } from '@/lib/services/newsapi'
+import { aggregateNews } from '@/lib/services/news'
+import type { NewsItem as DatabaseNewsItem } from '@/lib/types'
 
-// Mock news data - em produção, você conectaria com APIs reais
+// Verificar se as APIs estão configuradas
+const isNewsAPIConfigured = !!process.env.NEWS_API_KEY
+const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Dados mock como fallback
 const mockNewsData: NewsItem[] = [
   {
     id: 'news-1',
@@ -29,45 +36,6 @@ const mockNewsData: NewsItem[] = [
     category: 'technology',
     tags: ['bicicleta elétrica', 'mercado', 'crescimento'],
     relevance_score: 88
-  },
-  {
-    id: 'news-3',
-    title: 'Acidentes com equipamentos de mobilidade aumentam 30%',
-    description: 'Estudo mostra crescimento nos acidentes envolvendo patinetes e bicicletas elétricas.',
-    content: 'Um estudo realizado pela Secretaria Nacional de Trânsito mostra que os acidentes envolvendo equipamentos de mobilidade urbana aumentaram 30% no último trimestre...',
-    url: 'https://example.com/news/3',
-    image_url: 'https://images.unsplash.com/photo-1543762996-8e14c13a8cb8?w=800&h=600&fit=crop&auto=format&q=80',
-    source: 'Folha de S.Paulo',
-    published_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    category: 'safety',
-    tags: ['segurança', 'acidentes', 'mobilidade'],
-    relevance_score: 82
-  },
-  {
-    id: 'news-4',
-    title: 'Novas ciclovias para bicicletas elétricas em São Paulo',
-    description: 'Prefeitura de São Paulo anuncia expansão da rede de ciclovias para equipamentos elétricos.',
-    content: 'A Prefeitura de São Paulo anunciou hoje a expansão da rede de ciclovias com foco em equipamentos elétricos...',
-    url: 'https://example.com/news/4',
-    image_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=600&fit=crop&auto=format&q=80',
-    source: 'Estadão',
-    published_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    category: 'urban_mobility',
-    tags: ['ciclovia', 'São Paulo', 'infraestrutura'],
-    relevance_score: 78
-  },
-  {
-    id: 'news-5',
-    title: 'Tecnologia de baterias melhora autonomia de patinetes',
-    description: 'Nova geração de baterias promete dobrar a autonomia dos patinetes elétricos.',
-    content: 'Fabricantes anunciam nova tecnologia de baterias que pode dobrar a autonomia dos patinetes elétricos...',
-    url: 'https://example.com/news/5',
-    image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=800&h=600&fit=crop&auto=format&q=80',
-    source: 'TechTudo',
-    published_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    category: 'technology',
-    tags: ['bateria', 'autonomia', 'inovação'],
-    relevance_score: 85
   }
 ]
 
@@ -79,13 +47,97 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const category = searchParams.get('category') || 'all'
     
-    // Simular delay da API
-    await new Promise(resolve => setTimeout(resolve, 500))
+    let newsData: NewsItem[] = []
+    let source = 'unknown'
     
-    let filteredNews = mockNewsData
+    // Tentar buscar dados reais da NewsAPI
+    if (isNewsAPIConfigured) {
+      try {
+        console.log('🔍 Fetching real news from NewsAPI...')
+        const realNews = await newsAPIService.getPortugueseNews()
+        if (realNews && realNews.length > 0) {
+          // Transform from database format to service format
+          newsData = realNews.map((item: DatabaseNewsItem): NewsItem => ({
+            id: item.id,
+            title: item.title,
+            description: item.excerpt,
+            content: item.content,
+            url: item.source_url,
+            source: item.source,
+            published_at: item.published_at,
+            category: item.category,
+            tags: [], // Database doesn't have tags, use empty array
+            image_url: item.image_url || undefined,
+            relevance_score: 50 // Default relevance score
+          }))
+          source = 'newsapi'
+          console.log(`✅ Successfully fetched ${newsData.length} news articles from NewsAPI`)
+        } else {
+          console.log('⚠️ NewsAPI returned no data')
+          source = 'newsapi_empty'
+        }
+      } catch (error) {
+        console.error('❌ Error fetching from NewsAPI:', error)
+        source = 'newsapi_failed'
+      }
+    } else {
+      console.warn('⚠️ NewsAPI not configured - NEWS_API_KEY missing')
+      source = 'newsapi_not_configured'
+    }
     
-    if (category !== 'all') {
-      filteredNews = mockNewsData.filter(news => news.category === category)
+    // Se não conseguiu dados da NewsAPI, usar dados do banco
+    if (newsData.length === 0 && isSupabaseConfigured) {
+      try {
+        console.log('🔍 Fetching news from database...')
+        const supabase = createAdminClient()
+        const { data: dbNews, error } = await supabase
+          .schema('public')
+          .from('news')
+          .select('*')
+          .order('published_at', { ascending: false })
+          .limit(50)
+        
+        if (error) {
+          console.error('❌ Database error:', error)
+          source = 'database_failed'
+        } else if (dbNews && dbNews.length > 0) {
+          // Transform database format to service format
+          newsData = dbNews.map((item: DatabaseNewsItem): NewsItem => ({
+            id: item.id,
+            title: item.title,
+            description: item.excerpt,
+            content: item.content,
+            url: item.source_url,
+            source: item.source,
+            published_at: item.published_at,
+            category: item.category,
+            tags: [], // Database doesn't have tags, use empty array
+            image_url: item.image_url || undefined,
+            relevance_score: 50 // Default relevance score
+          }))
+          source = 'database'
+          console.log(`✅ Successfully fetched ${newsData.length} news articles from database`)
+        } else {
+          console.log('⚠️ Database returned no data')
+          source = 'database_empty'
+        }
+      } catch (error) {
+        console.error('❌ Error fetching from database:', error)
+        source = 'database_failed'
+      }
+    }
+    
+    // Se ainda não tem dados, usar mock
+    if (newsData.length === 0) {
+      console.log('⚠️ Using mock data as fallback')
+      newsData = mockNewsData
+      source = 'mock_fallback'
+    }
+    
+    // Filtrar por categoria se especificada
+    let filteredNews = newsData
+    if (category !== 'all' && newsData.length > 0) {
+      filteredNews = newsData.filter(news => news.category === category)
     }
     
     const responseTime = Date.now() - startTime
@@ -99,12 +151,17 @@ export async function GET(request: NextRequest) {
         category,
         timestamp: new Date().toISOString(),
         responseTime,
-        source: 'mock_api'
+        source,
+        configured: {
+          newsapi: isNewsAPIConfigured,
+          supabase: isSupabaseConfigured
+        }
       }
     })
     
   } catch (error) {
     const responseTime = Date.now() - startTime
+    console.error('❌ Error in news API:', error)
     
     return NextResponse.json({
       success: false,
@@ -112,7 +169,11 @@ export async function GET(request: NextRequest) {
       metadata: {
         timestamp: new Date().toISOString(),
         responseTime,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        configured: {
+          newsapi: isNewsAPIConfigured,
+          supabase: isSupabaseConfigured
+        }
       }
     }, { status: 500 })
   }
@@ -120,26 +181,46 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Endpoint para sincronizar notícias com fonte externa
     const { source, force_refresh } = await request.json()
     
-    // Simular sincronização
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    if (!isNewsAPIConfigured) {
+      return NextResponse.json({
+        success: false,
+        error: 'NewsAPI not configured',
+        details: 'NEWS_API_KEY environment variable is required'
+      }, { status: 400 })
+    }
     
-    const syncedCount = mockNewsData.length
+    if (!isSupabaseConfigured) {
+      return NextResponse.json({
+        success: false,
+        error: 'Supabase not configured',
+        details: 'Supabase environment variables are required'
+      }, { status: 400 })
+    }
+    
+    console.log('🔄 Starting news aggregation...')
+    
+    // Executar agregação real de notícias
+    const result = await aggregateNews()
+    
+    console.log('✅ News aggregation completed:', result)
     
     return NextResponse.json({
-      success: true,
-      message: `Synchronized ${syncedCount} news articles`,
+      success: result.success,
+      message: `Synchronized ${result.processed || 0} news articles`,
       data: {
-        synced_count: syncedCount,
-        source: source || 'default',
+        synced_count: result.processed || 0,
+        source: source || 'newsapi',
         force_refresh: force_refresh || false,
-        last_sync: new Date().toISOString()
+        last_sync: new Date().toISOString(),
+        errors: result.errors || []
       }
     })
     
   } catch (error) {
+    console.error('❌ Error in news sync:', error)
+    
     return NextResponse.json({
       success: false,
       error: 'Failed to sync news data',

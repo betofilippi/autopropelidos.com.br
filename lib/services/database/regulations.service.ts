@@ -1,5 +1,10 @@
-import { createClient, createServerSupabaseClient, type Regulation, type RegulationInsert, type RegulationUpdate } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+import { Regulation } from '@/lib/types'
 import { SupabaseClient } from '@supabase/supabase-js'
+
+// Type aliases for consistency
+type RegulationInsert = Omit<Regulation, 'id' | 'created_at'>
+type RegulationUpdate = Partial<RegulationInsert>
 
 export interface RegulationFilters {
   regulationType?: Regulation['regulation_type']
@@ -30,7 +35,7 @@ class RegulationService {
   private getClient(): SupabaseClient {
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }

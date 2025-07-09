@@ -1,4 +1,10 @@
-import { createClient, createServerSupabaseClient, type Vehicle, type VehicleInsert, type VehicleUpdate } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+import { Vehicle } from '@/lib/types'
+
+// Type aliases for consistency
+type VehicleInsert = Omit<Vehicle, 'id' | 'created_at'>
+type VehicleUpdate = Partial<VehicleInsert>
+
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface VehicleFilters {
@@ -40,7 +46,7 @@ class VehicleService {
   private getClient(): SupabaseClient {
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }
@@ -368,7 +374,9 @@ class VehicleService {
         totalSpeed += vehicle.max_speed_kmh
 
         // Count categories
-        stats.categoryCounts[vehicle.category]++
+        if (vehicle.category in stats.categoryCounts) {
+          (stats.categoryCounts as any)[vehicle.category]++
+        }
       })
 
       stats.averagePrice = priceCount > 0 ? totalPrice / priceCount : 0

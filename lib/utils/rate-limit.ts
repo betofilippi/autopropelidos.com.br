@@ -31,6 +31,10 @@ class RateLimiter {
     this.configs.set(endpoint, config)
   }
 
+  getConfig(endpoint: string): RateLimitConfig | undefined {
+    return this.configs.get(endpoint)
+  }
+
   check(identifier: string, endpoint: string): { allowed: boolean; remaining: number; resetTime: number } {
     const config = this.configs.get(endpoint)
     if (!config) {
@@ -149,13 +153,13 @@ export async function applyRateLimit(
   const result = rateLimiter.check(identifier, endpoint)
 
   const headers = {
-    'X-RateLimit-Limit': rateLimiter.configs.get(endpoint)?.requests.toString() || 'unlimited',
+    'X-RateLimit-Limit': rateLimiter.getConfig(endpoint)?.requests.toString() || 'unlimited',
     'X-RateLimit-Remaining': result.remaining.toString(),
     'X-RateLimit-Reset': result.resetTime.toString()
   }
 
   if (!result.allowed) {
-    const config = rateLimiter.configs.get(endpoint)
+    const config = rateLimiter.getConfig(endpoint)
     return {
       success: false,
       headers,

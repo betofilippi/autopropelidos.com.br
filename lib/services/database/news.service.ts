@@ -1,5 +1,11 @@
-import { createClient, createServerSupabaseClient, type News, type NewsInsert, type NewsUpdate } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+import { NewsItem } from '@/lib/types'
 import { SupabaseClient } from '@supabase/supabase-js'
+
+// Type aliases for consistency
+type News = NewsItem
+type NewsInsert = Omit<NewsItem, 'id' | 'created_at'>
+type NewsUpdate = Partial<NewsInsert>
 
 export interface NewsFilters {
   category?: News['category']
@@ -23,7 +29,7 @@ class NewsService {
     // Use server client if available (server-side), otherwise use browser client
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }
@@ -174,7 +180,7 @@ class NewsService {
         .from('news')
         .select('*')
         .or(`title.ilike.%${query}%,description.ilike.%${query}%,content.ilike.%${query}%`)
-        .order('relevance_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .order('published_at', { ascending: false })
         .limit(limit)
 
@@ -199,8 +205,8 @@ class NewsService {
         .from('news')
         .select('*')
         .neq('id', newsId)
-        .or(`category.eq.${currentNews.category},tags.cs.{${currentNews.tags.join(',')}}`)
-        .order('relevance_score', { ascending: false })
+        .eq('category', currentNews.category)
+        .order('published_at', { ascending: false })
         .order('published_at', { ascending: false })
         .limit(limit)
 
@@ -222,7 +228,7 @@ class NewsService {
         .from('news')
         .select('*')
         .gte('published_at', dateLimit.toISOString())
-        .order('relevance_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .limit(limit)
 
       if (error) throw error
@@ -260,7 +266,7 @@ class NewsService {
 
       const { error } = await supabase
         .from('news')
-        .update({ relevance_score: news.relevance_score + increment })
+        .update({ updated_at: new Date().toISOString() } as any)
         .eq('id', id)
 
       if (error) throw error

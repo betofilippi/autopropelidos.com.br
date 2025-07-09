@@ -274,7 +274,8 @@ export class HealthMonitoringService {
   private async sendAlertNotification(alert: Alert) {
     try {
       // Send webhook notification
-      await this.webhookService.notifySystemAlert(alert.level, alert.message, alert.details)
+      const webhookLevel = alert.level === 'critical' ? 'error' : alert.level as 'info' | 'warning' | 'error'
+      await this.webhookService.notifySystemAlert(webhookLevel, alert.message, alert.details)
 
       // Log to database
       const supabase = createAdminClient()
@@ -307,7 +308,7 @@ export class HealthMonitoringService {
     
     const checks: Record<string, HealthCheck> = {
       uptime: {
-        status: 'healthy',
+        status: 'healthy' as const,
         responseTime: 0,
         message: `Up for ${Math.floor(process.uptime())} seconds`,
         lastChecked: new Date().toISOString()
@@ -414,7 +415,7 @@ export class HealthMonitoringService {
 
       if (error) {
         return {
-          status: 'unhealthy',
+          status: 'unhealthy' as const,
           responseTime,
           message: 'Database connection failed',
           details: { error: error.message },
@@ -430,7 +431,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'Database check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -455,7 +456,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'Cache check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -486,7 +487,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'External API check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -517,7 +518,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'System resource check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -534,7 +535,7 @@ export class HealthMonitoringService {
       const responseTime = Date.now() - startTime
 
       return {
-        status: 'healthy',
+        status: 'healthy' as const,
         responseTime,
         message: 'Application is responsive',
         details: {
@@ -547,7 +548,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'Application check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -586,7 +587,7 @@ export class HealthMonitoringService {
       }
     } catch (error) {
       return {
-        status: 'error',
+        status: 'error' as const,
         responseTime: Date.now() - startTime,
         message: 'Security check failed',
         details: { error: error instanceof Error ? error.message : 'Unknown error' },
@@ -655,15 +656,17 @@ export class HealthMonitoringService {
       const responseTime = Date.now() - startTime
       
       return {
-        status: response.ok ? 'healthy' : 'degraded',
+        status: response.ok ? 'healthy' as const : 'degraded' as const,
         quota: response.ok ? 1000 : 0, // Placeholder
-        responseTime
+        responseTime,
+        lastChecked: new Date().toISOString()
       }
     } catch (error) {
       return {
-        status: 'unhealthy',
+        status: 'unhealthy' as const,
         quota: 0,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
+        lastChecked: new Date().toISOString()
       }
     }
   }
@@ -676,15 +679,17 @@ export class HealthMonitoringService {
       const responseTime = Date.now() - startTime
       
       return {
-        status: response.ok ? 'healthy' : 'degraded',
+        status: response.ok ? 'healthy' as const : 'degraded' as const,
         quota: response.ok ? 10000 : 0, // Placeholder
-        responseTime
+        responseTime,
+        lastChecked: new Date().toISOString()
       }
     } catch (error) {
       return {
-        status: 'unhealthy',
+        status: 'unhealthy' as const,
         quota: 0,
-        responseTime: Date.now() - startTime
+        responseTime: Date.now() - startTime,
+        lastChecked: new Date().toISOString()
       }
     }
   }
@@ -703,13 +708,15 @@ export class HealthMonitoringService {
       const responseTime = Date.now() - startTime
       
       return {
-        status: !error ? 'healthy' : 'unhealthy',
-        responseTime
+        status: !error ? 'healthy' as const : 'unhealthy' as const,
+        responseTime,
+        lastChecked: new Date().toISOString()
       }
     } catch (error) {
       return {
-        status: 'unhealthy',
-        responseTime: Date.now() - startTime
+        status: 'unhealthy' as const,
+        responseTime: Date.now() - startTime,
+        lastChecked: new Date().toISOString()
       }
     }
   }

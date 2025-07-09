@@ -389,8 +389,9 @@ export class WebVitalsMonitor {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       entries.forEach(entry => {
-        this.metrics.fid = entry.processingStart - entry.startTime
-        this.sendMetric('FID', entry.processingStart - entry.startTime)
+        const fidEntry = entry as any // Type assertion for first-input entries
+        this.metrics.fid = fidEntry.processingStart - fidEntry.startTime
+        this.sendMetric('FID', fidEntry.processingStart - fidEntry.startTime)
       })
     })
     
@@ -443,12 +444,4 @@ declare global {
   }
 }
 
-export {
-  CacheManager,
-  ResourcePreloader,
-  LazyLoadManager,
-  NewsPerformanceMetrics,
-  ImageOptimizer,
-  CriticalCSSManager,
-  WebVitalsMonitor
-}
+// Classes are already exported inline above

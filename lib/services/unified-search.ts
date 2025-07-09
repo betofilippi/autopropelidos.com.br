@@ -67,7 +67,7 @@ export async function unifiedSearch(
     }
     
     if (types.includes('videos')) {
-      searchPromises.push(searchVideos(query, filters, pagination))
+      searchPromises.push(searchVideos(query))
       searchTypes.push('videos')
     }
     
@@ -372,17 +372,14 @@ export async function getSearchStats(): Promise<{
       search_trends: []
     }
     
-    // Gera tendências de busca dos últimos 7 dias
-    const now = new Date()
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
-      
-      searchStats.search_trends.push({
-        date: date.toISOString().split('T')[0],
+    // Gera tendências de busca dos últimos 7 dias (mock data)
+    const dates = ['2024-07-03', '2024-07-04', '2024-07-05', '2024-07-06', '2024-07-07', '2024-07-08', '2024-07-09']
+    dates.forEach(dateStr => {
+      (searchStats.search_trends as any).push({
+        date: dateStr,
         searches: Math.floor(Math.random() * 2000) + 800
       })
-    }
+    })
     
     cacheManager.analytics.set(cacheKey, searchStats, 1800) // 30 minutos
     

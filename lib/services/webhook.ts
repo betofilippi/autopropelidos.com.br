@@ -39,7 +39,7 @@ export class WebhookService {
     this.startRetryProcessor()
   }
 
-  async send(url: string, payload: WebhookPayload, config: WebhookConfig = {}): Promise<boolean> {
+  async send(url: string, payload: WebhookPayload, config: Partial<WebhookConfig> = {}): Promise<boolean> {
     const attemptId = this.generateAttemptId()
     
     const attempt: WebhookAttempt = {
@@ -73,7 +73,7 @@ export class WebhookService {
     }
   }
 
-  private async executeWebhook(attempt: WebhookAttempt, config: WebhookConfig): Promise<boolean> {
+  private async executeWebhook(attempt: WebhookAttempt, config: Partial<WebhookConfig>): Promise<boolean> {
     const {
       timeout = 10000,
       headers = {},
@@ -89,7 +89,7 @@ export class WebhookService {
     // Add signature if secret is provided
     if (secret) {
       const signature = await this.generateSignature(attempt.payload, secret)
-      requestHeaders['X-Webhook-Signature'] = signature
+      Object.assign(requestHeaders, { 'X-Webhook-Signature': signature })
     }
 
     try {
@@ -134,7 +134,7 @@ export class WebhookService {
     return `sha256=${hmac.digest('hex')}`
   }
 
-  private scheduleRetry(attempt: WebhookAttempt, config: WebhookConfig) {
+  private scheduleRetry(attempt: WebhookAttempt, config: Partial<WebhookConfig>) {
     const maxRetries = config.retries || this.maxRetries
     
     if (attempt.attempt >= maxRetries) {
@@ -152,7 +152,7 @@ export class WebhookService {
     }, delay)
   }
 
-  private async retryWebhook(attempt: WebhookAttempt, config: WebhookConfig) {
+  private async retryWebhook(attempt: WebhookAttempt, config: Partial<WebhookConfig>) {
     attempt.attempt++
     attempt.status = 'pending'
     attempt.timestamp = new Date()

@@ -1,5 +1,26 @@
-import { createClient, createServerSupabaseClient, type Analytics, type AnalyticsInsert } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
+
+// Define Analytics types locally
+interface Analytics {
+  id: string
+  event_type: string
+  user_id?: string
+  session_id?: string
+  page_url: string
+  referrer?: string
+  timestamp: string
+  metadata?: any
+}
+
+interface AnalyticsInsert {
+  event_type: string
+  user_id?: string
+  session_id?: string
+  page_url: string
+  referrer?: string
+  metadata?: any
+}
 
 export type EventType = 
   | 'page_view'
@@ -65,7 +86,7 @@ class AnalyticsService {
   private getClient(): SupabaseClient {
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }
@@ -84,8 +105,8 @@ class AnalyticsService {
       
       const analyticsData: AnalyticsInsert = {
         event_type: event.event_type,
-        event_data: event.event_data || {},
-        user_id: event.user_id,
+        metadata: event.event_data || {},
+        user_id: event.user_id || undefined,
         session_id: event.session_id || this.generateSessionId(),
         page_url: event.page_url,
       }

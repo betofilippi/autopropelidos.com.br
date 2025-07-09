@@ -78,7 +78,7 @@ export class DatabaseOptimizerService {
           timestamp: new Date()
         })) || [],
         performance: {
-          queryPerformance: queryPerformance || [],
+          queryPerformance: (queryPerformance as any) || [],
           indexUsage: parseFloat(avgIndexUsage),
           connectionCount,
           tablesSizes: tableSizes
@@ -158,8 +158,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'remove_duplicates',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -177,7 +177,7 @@ export class DatabaseOptimizerService {
         .select('relevance_score')
         .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
-      const avgBefore = beforeStats?.reduce((sum, item) => sum + item.relevance_score, 0) / (beforeStats?.length || 1)
+      const avgBefore = beforeStats ? beforeStats.reduce((sum, item) => sum + item.relevance_score, 0) / (beforeStats.length || 1) : 0
 
       // Update scores
       const { error } = await this.supabase.rpc('update_trending_scores')
@@ -191,7 +191,7 @@ export class DatabaseOptimizerService {
         .select('relevance_score')
         .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
-      const avgAfter = afterStats?.reduce((sum, item) => sum + item.relevance_score, 0) / (afterStats?.length || 1)
+      const avgAfter = afterStats ? afterStats.reduce((sum, item) => sum + item.relevance_score, 0) / (afterStats.length || 1) : 0
 
       return {
         success: true,
@@ -210,8 +210,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'update_trending_scores',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -247,8 +247,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'refresh_materialized_views',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -269,9 +269,9 @@ export class DatabaseOptimizerService {
         operation: 'cleanup_old_data',
         details: {
           changes: {
-            newsDeleted: cleanupResults?.[0]?.news_deleted || 0,
-            videosDeleted: cleanupResults?.[0]?.videos_deleted || 0,
-            analyticsDeleted: cleanupResults?.[0]?.analytics_deleted || 0,
+            newsDeleted: (cleanupResults as any)?.[0]?.news_deleted || 0,
+            videosDeleted: (cleanupResults as any)?.[0]?.videos_deleted || 0,
+            analyticsDeleted: (cleanupResults as any)?.[0]?.analytics_deleted || 0,
             daysToKeep
           }
         },
@@ -284,8 +284,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'cleanup_old_data',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -320,8 +320,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'analyze_tables',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -330,12 +330,13 @@ export class DatabaseOptimizerService {
 
   private async getTableSizes(): Promise<Record<string, string>> {
     try {
-      const { data: tableSizes } = await this.supabase
+      const tableSizesResponse = await this.supabase
         .rpc('get_table_sizes') // This would need to be created as a custom function
-        .catch(() => ({ data: null })) // Fallback if function doesn't exist
+        .then(result => result, () => ({ data: null })) // Fallback if function doesn't exist
+      const { data: tableSizes } = tableSizesResponse
 
       if (tableSizes) {
-        return tableSizes.reduce((acc: Record<string, string>, item: any) => {
+        return (tableSizes as any[]).reduce((acc: Record<string, string>, item: any) => {
           acc[item.table_name] = item.size
           return acc
         }, {})
@@ -358,11 +359,12 @@ export class DatabaseOptimizerService {
   private async getConnectionCount(): Promise<number> {
     try {
       // This would typically require admin privileges
-      const { data: connections } = await this.supabase
+      const connectionsResponse = await this.supabase
         .rpc('get_connection_count') // Custom function needed
-        .catch(() => ({ data: 0 }))
+        .then(result => result, () => ({ data: 0 }))
+      const { data: connections } = connectionsResponse
 
-      return connections || 0
+      return (connections as number) || 0
 
     } catch (error) {
       console.error('Error getting connection count:', error)
@@ -421,8 +423,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'create_indexes',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }
@@ -460,8 +462,8 @@ export class DatabaseOptimizerService {
         success: false,
         operation: 'optimize_queries',
         details: {
-          error: error instanceof Error ? error.message : 'Unknown error'
-        },
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        } as any,
         duration: Date.now() - startTime,
         timestamp: new Date()
       }

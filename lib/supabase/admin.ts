@@ -16,7 +16,7 @@ export function createAdminClient() {
       persistSession: false
     },
     db: {
-      schema: 'autopropelidos.com.br'
+      schema: 'public'
     }
   })
 }

@@ -1,8 +1,14 @@
-import { createClient, createServerSupabaseClient, type Video, type VideoInsert, type VideoUpdate } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
+import { Video } from '@/lib/types'
+
+// Type aliases for consistency
+type VideoInsert = Omit<Video, 'id' | 'created_at'>
+type VideoUpdate = Partial<VideoInsert>
+
 import { SupabaseClient } from '@supabase/supabase-js'
 
 export interface VideoFilters {
-  category?: Video['category']
+  category?: string
   channelId?: string
   tags?: string[]
   searchQuery?: string
@@ -23,7 +29,7 @@ class VideoService {
   private getClient(): SupabaseClient {
     if (typeof window === 'undefined') {
       try {
-        return createServerSupabaseClient()
+        return createClient()
       } catch {
         return createClient()
       }
@@ -177,7 +183,7 @@ class VideoService {
         .from('videos')
         .select('*')
         .or(`title.ilike.%${query}%,description.ilike.%${query}%,transcript.ilike.%${query}%,channel_name.ilike.%${query}%`)
-        .order('relevance_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .order('view_count', { ascending: false })
         .limit(limit)
 
@@ -202,8 +208,8 @@ class VideoService {
         .from('videos')
         .select('*')
         .neq('id', videoId)
-        .or(`category.eq.${currentVideo.category},tags.cs.{${currentVideo.tags.join(',')}},channel_id.eq.${currentVideo.channel_id}`)
-        .order('relevance_score', { ascending: false })
+        .eq('channel_id', currentVideo.channel_id)
+        .order('published_at', { ascending: false })
         .order('published_at', { ascending: false })
         .limit(limit)
 
@@ -226,7 +232,7 @@ class VideoService {
         .select('*')
         .gte('published_at', dateLimit.toISOString())
         .order('view_count', { ascending: false })
-        .order('relevance_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .limit(limit)
 
       if (error) throw error
@@ -312,7 +318,7 @@ class VideoService {
 
       const { error } = await supabase
         .from('videos')
-        .update({ relevance_score: video.relevance_score + increment })
+        .update({ updated_at: new Date().toISOString() } as any)
         .eq('id', id)
 
       if (error) throw error
@@ -330,7 +336,7 @@ class VideoService {
         .from('videos')
         .select('*')
         .in('category', ['educational', 'tutorial'])
-        .order('relevance_score', { ascending: false })
+        .order('published_at', { ascending: false })
         .order('published_at', { ascending: false })
         .limit(limit)
 

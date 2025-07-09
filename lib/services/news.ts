@@ -111,14 +111,14 @@ export async function aggregateNews(): Promise<{ success: boolean; processed: nu
     const newsItems: NewsItem[] = allArticles.map(article => ({
       id: article.url, // Usar URL como ID temporário
       title: article.title,
-      description: article.description,
-      content: article.content,
+      description: article.description || '',
+      content: article.content || undefined,
       url: article.url,
       source: article.source.name,
       published_at: article.publishedAt,
       category: categorizeArticle(article),
       tags: extractTags(article),
-      image_url: article.urlToImage,
+      image_url: article.urlToImage || undefined,
       relevance_score: calculateRelevance(article)
     }))
 
@@ -143,8 +143,8 @@ export async function aggregateNews(): Promise<{ success: boolean; processed: nu
         if (!existing) {
           const { error } = await supabase.from('news').insert({
             title: article.title,
-            description: article.description,
-            content: article.content,
+            description: article.description || '',
+            content: article.content || undefined,
             url: article.url,
             source: article.source,
             published_at: article.published_at,
@@ -278,6 +278,7 @@ export async function getLatestNews(
       source: 'Portal do Trânsito',
       published_at: '2023-06-15T10:00:00Z',
       category: 'regulation',
+      tags: ['regulamentação', 'trânsito'],
       image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
       relevance_score: 95
     },
@@ -289,6 +290,7 @@ export async function getLatestNews(
       source: 'G1 Trânsito',
       published_at: '2023-12-01T08:30:00Z',
       category: 'safety',
+      tags: ['segurança', 'patinetes', 'trânsito'],
       image_url: 'https://images.unsplash.com/photo-1544191696-15693072b1d8?w=400&h=300&fit=crop',
       relevance_score: 88
     },
@@ -300,6 +302,7 @@ export async function getLatestNews(
       source: 'Folha de São Paulo',
       published_at: '2024-01-10T14:20:00Z',
       category: 'urban_mobility',
+      tags: ['mercado', 'crescimento', 'patinetes'],
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
       relevance_score: 82
     },
@@ -311,6 +314,7 @@ export async function getLatestNews(
       source: 'TechTudo',
       published_at: '2024-02-05T16:45:00Z',
       category: 'technology',
+      tags: ['tecnologia', 'baterias', 'autonomia'],
       image_url: 'https://images.unsplash.com/photo-1609178669106-2c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 75
     },
@@ -322,6 +326,7 @@ export async function getLatestNews(
       source: 'UOL Carros',
       published_at: '2024-03-12T09:15:00Z',
       category: 'regulation',
+      tags: ['DETRAN', 'ciclomotores', 'regularização'],
       image_url: 'https://images.unsplash.com/photo-1558618666-1c0c6c9a9a7a?w=400&h=300&fit=crop',
       relevance_score: 92
     },
@@ -333,6 +338,7 @@ export async function getLatestNews(
       source: 'Estadão',
       published_at: '2024-04-08T11:30:00Z',
       category: 'urban_mobility',
+      tags: ['ciclofaixas', 'São Paulo', 'infraestrutura'],
       image_url: 'https://images.unsplash.com/photo-1567226475328-9d6baaf565cf?w=400&h=300&fit=crop',
       relevance_score: 79
     },
@@ -344,6 +350,7 @@ export async function getLatestNews(
       source: 'R7',
       published_at: '2024-05-15T13:20:00Z',
       category: 'safety',
+      tags: ['acidentes', 'SAMU', 'estatísticas'],
       image_url: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=300&fit=crop',
       relevance_score: 91
     },
@@ -355,6 +362,7 @@ export async function getLatestNews(
       source: 'CNN Brasil',
       published_at: '2024-06-01T09:45:00Z',
       category: 'urban_mobility',
+      tags: ['delivery', 'bicicletas elétricas', 'sustentabilidade'],
       image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
       relevance_score: 77
     },
@@ -366,6 +374,7 @@ export async function getLatestNews(
       source: 'Metrópoles',
       published_at: '2024-04-20T16:10:00Z',
       category: 'regulation',
+      tags: ['regulamentação'],
       image_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=300&fit=crop',
       relevance_score: 89
     },
@@ -377,6 +386,7 @@ export async function getLatestNews(
       source: 'Auto Esporte',
       published_at: '2024-03-25T12:30:00Z',
       category: 'safety',
+      tags: ['segurança'],
       image_url: 'https://images.unsplash.com/photo-1558618047-3c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 73
     },
@@ -388,6 +398,7 @@ export async function getLatestNews(
       source: 'Terra',
       published_at: '2024-02-18T14:55:00Z',
       category: 'technology',
+      tags: ['tecnologia'],
       image_url: 'https://images.unsplash.com/photo-1609178669106-2c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 84
     },
@@ -399,6 +410,7 @@ export async function getLatestNews(
       source: 'Exame',
       published_at: '2024-01-28T10:15:00Z',
       category: 'technology',
+      tags: ["item"],
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
       relevance_score: 78
     },
@@ -410,6 +422,7 @@ export async function getLatestNews(
       source: 'G1',
       published_at: '2024-05-08T08:20:00Z',
       category: 'regulation',
+      tags: ["item"],
       image_url: 'https://images.unsplash.com/photo-1544191696-15693072b1d8?w=400&h=300&fit=crop',
       relevance_score: 86
     },
@@ -421,6 +434,7 @@ export async function getLatestNews(
       source: 'Valor Econômico',
       published_at: '2024-03-30T15:40:00Z',
       category: 'safety',
+      tags: ['segurança'],
       image_url: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=300&fit=crop',
       relevance_score: 81
     },
@@ -432,6 +446,7 @@ export async function getLatestNews(
       source: 'IstoÉ',
       published_at: '2024-04-12T11:25:00Z',
       category: 'urban_mobility',
+      tags: ['mobilidade'],
       image_url: 'https://images.unsplash.com/photo-1567226475328-9d6baaf565cf?w=400&h=300&fit=crop',
       relevance_score: 76
     },
@@ -443,6 +458,7 @@ export async function getLatestNews(
       source: 'Olhar Direto',
       published_at: '2024-02-28T13:50:00Z',
       category: 'technology',
+      tags: ['tecnologia'],
       image_url: 'https://images.unsplash.com/photo-1609178669106-2c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 72
     },
@@ -454,6 +470,7 @@ export async function getLatestNews(
       source: 'Agência Brasil',
       published_at: '2024-05-22T09:35:00Z',
       category: 'regulation',
+      tags: ['regulamentação'],
       image_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=300&fit=crop',
       relevance_score: 87
     },
@@ -465,6 +482,7 @@ export async function getLatestNews(
       source: 'Portal da Inclusão',
       published_at: '2024-04-05T17:20:00Z',
       category: 'urban_mobility',
+      tags: ["item"],
       image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
       relevance_score: 85
     },
@@ -476,6 +494,7 @@ export async function getLatestNews(
       source: 'Convergência Digital',
       published_at: '2024-03-15T14:45:00Z',
       category: 'technology',
+      tags: ["item"],
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
       relevance_score: 79
     },
@@ -487,6 +506,7 @@ export async function getLatestNews(
       source: 'Trânsito BR',
       published_at: '2024-05-30T10:10:00Z',
       category: 'safety',
+      tags: ['segurança'],
       image_url: 'https://images.unsplash.com/photo-1558618047-3c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 83
     },
@@ -498,6 +518,7 @@ export async function getLatestNews(
       source: 'O Eco',
       published_at: '2024-06-10T16:30:00Z',
       category: 'urban_mobility',
+      tags: ['mobilidade'],
       image_url: 'https://images.unsplash.com/photo-1567226475328-9d6baaf565cf?w=400&h=300&fit=crop',
       relevance_score: 80
     },
@@ -509,6 +530,7 @@ export async function getLatestNews(
       source: 'Startup Brasil',
       published_at: '2024-04-18T12:55:00Z',
       category: 'technology',
+      tags: ['tecnologia'],
       image_url: 'https://images.unsplash.com/photo-1609178669106-2c8c5f2d0c68?w=400&h=300&fit=crop',
       relevance_score: 74
     },
@@ -520,6 +542,7 @@ export async function getLatestNews(
       source: 'Portal do Governo',
       published_at: '2024-05-25T11:40:00Z',
       category: 'urban_mobility',
+      tags: ["item"],
       image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
       relevance_score: 88
     },
@@ -531,6 +554,7 @@ export async function getLatestNews(
       source: 'Gazeta do Povo',
       published_at: '2024-06-20T15:15:00Z',
       category: 'urban_mobility',
+      tags: ['mobilidade'],
       image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
       relevance_score: 92
     }
@@ -605,6 +629,7 @@ export async function getLatestNews(
       source: 'Portal do Trânsito',
       published_at: '2023-06-15T10:00:00Z',
       category: 'regulation',
+      tags: ['regulamentação', 'trânsito'],
       image_url: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=300&fit=crop',
       relevance_score: 95
     }
