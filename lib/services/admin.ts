@@ -107,17 +107,17 @@ export class AdminService {
     
     // Get basic stats
     const [newsCount, videosCount, usersCount, pendingContent, approvedContent, rejectedContent] = await Promise.all([
-      supabase.schema('autopropelidos.com.br').from('news').select('id', { count: 'exact', head: true }),
-      supabase.schema('autopropelidos.com.br').from('videos').select('id', { count: 'exact', head: true }),
-      supabase.schema('autopropelidos.com.br').from('users').select('id', { count: 'exact', head: true }),
-      supabase.schema('autopropelidos.com.br').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.schema('autopropelidos.com.br').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-      supabase.schema('autopropelidos.com.br').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'rejected')
+      supabase.schema('public').from('news').select('id', { count: 'exact', head: true }),
+      supabase.schema('public').from('videos').select('id', { count: 'exact', head: true }),
+      supabase.schema('public').from('users').select('id', { count: 'exact', head: true }),
+      supabase.schema('public').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.schema('public').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.schema('public').from('content_queue').select('id', { count: 'exact', head: true }).eq('status', 'rejected')
     ])
 
     // Get recent activity
     const { data: recentActivity } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('admin_logs')
       .select('type, message, timestamp, severity')
       .order('timestamp', { ascending: false })
@@ -125,14 +125,14 @@ export class AdminService {
 
     // Get trending content
     const { data: trendingNews } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('news')
       .select('id, title, view_count, relevance_score')
       .order('relevance_score', { ascending: false })
       .limit(5)
 
     const { data: trendingVideos } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('videos')
       .select('id, title, view_count, relevance_score')
       .order('relevance_score', { ascending: false })
@@ -174,7 +174,7 @@ export class AdminService {
     const offset = (page - 1) * limit
 
     const { data: items, count } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('content_queue')
       .select(`
         id, type, title, status, created_at, publish_at, source, 
@@ -243,7 +243,7 @@ export class AdminService {
     const offset = (page - 1) * limit
 
     const { data: users, count } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('users')
       .select(`
         id, email, created_at, last_login, subscription_status, 
@@ -253,7 +253,7 @@ export class AdminService {
       .range(offset, offset + limit - 1)
 
     const { data: userStats } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('users')
       .select(`
         subscription_status,
@@ -289,7 +289,7 @@ export class AdminService {
     // Check database connectivity
     const dbStart = Date.now()
     const { error: dbError } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('news')
       .select('id')
       .limit(1)
@@ -333,7 +333,7 @@ export class AdminService {
     const offset = (page - 1) * limit
 
     const { data: logs, count } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('admin_logs')
       .select('*', { count: 'exact' })
       .order('timestamp', { ascending: false })
@@ -652,7 +652,7 @@ export class AdminService {
     
     // Get content from queue
     const { data: content } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('content_queue')
       .select('*')
       .eq('id', contentId)
@@ -663,7 +663,7 @@ export class AdminService {
     // Insert into main table
     const targetTable = contentType === 'news' ? 'news' : 'videos'
     await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from(targetTable)
       .insert({
         ...content,
@@ -676,7 +676,7 @@ export class AdminService {
     const supabase = createAdminClient()
     
     await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('admin_logs')
       .insert({
         type: action,
