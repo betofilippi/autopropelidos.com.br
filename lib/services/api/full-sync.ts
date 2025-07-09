@@ -223,7 +223,7 @@ export class FullSyncService {
           try {
             // Check if news exists
             const { data: existing } = await supabase
-              .schema('autopropelidos.com.br')
+              .schema('public')
               .from('news')
               .select('id, published_at')
               .eq('url', newsItem.source_url)
@@ -233,7 +233,7 @@ export class FullSyncService {
               // Update if needed
               if (existing.published_at !== newsItem.published_at) {
                 await supabase
-                  .schema('autopropelidos.com.br')
+                  .schema('public')
                   .from('news')
                   .update({
                     title: newsItem.title,
@@ -248,7 +248,7 @@ export class FullSyncService {
             } else {
               // Insert new or force refresh
               await supabase
-                .schema('autopropelidos.com.br')
+                .schema('public')
                 .from('news')
                 .upsert({
                   title: newsItem.title,
@@ -304,7 +304,7 @@ export class FullSyncService {
           try {
             // Check if video exists
             const { data: existing } = await supabase
-              .schema('autopropelidos.com.br')
+              .schema('public')
               .from('videos')
               .select('id, view_count')
               .eq('youtube_id', video.youtube_id)
@@ -314,7 +314,7 @@ export class FullSyncService {
               // Update view count if different
               if (existing.view_count !== video.views) {
                 await supabase
-                  .schema('autopropelidos.com.br')
+                  .schema('public')
                   .from('videos')
                   .update({
                     view_count: video.views,
@@ -328,7 +328,7 @@ export class FullSyncService {
             } else {
               // Insert new or force refresh
               await supabase
-                .schema('autopropelidos.com.br')
+                .schema('public')
                 .from('videos')
                 .upsert({
                   youtube_id: video.youtube_id,
