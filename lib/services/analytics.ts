@@ -112,7 +112,7 @@ export class AnalyticsService {
 
     // Process news articles
     const { data: news } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('news')
       .select('*')
       .gte('published_at', cutoffDate.toISOString())
@@ -143,7 +143,7 @@ export class AnalyticsService {
 
     // Process videos
     const { data: videos } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('videos')
       .select('*')
       .gte('published_at', cutoffDate.toISOString())
@@ -192,7 +192,7 @@ export class AnalyticsService {
 
     // Get analytics data for this content
     const { data: analytics } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('*')
       .eq('content_id', content.id)
@@ -211,7 +211,7 @@ export class AnalyticsService {
 
     // Get social metrics
     const { data: socialMetrics } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('social_metrics')
       .select('*')
       .eq('content_id', content.id)
@@ -339,7 +339,7 @@ export class AnalyticsService {
     
     // Get view count for this category in the last week
     const { data: categoryViews } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('views')
       .eq('category', category)
@@ -356,7 +356,7 @@ export class AnalyticsService {
     
     // Get historical performance of this source
     const { data: sourcePerformance } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('news')
       .select('relevance_score, view_count')
       .eq('source', source)
@@ -383,7 +383,7 @@ export class AnalyticsService {
     for (const keyword of keywords) {
       // Get recent mentions of this keyword
       const { data: keywordMentions } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('keyword_trends')
         .select('mentions, trend_score')
         .eq('keyword', keyword)
@@ -411,7 +411,7 @@ export class AnalyticsService {
       
       // Get content with their actual performance metrics
       const { data: trainingData } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('trending_history')
         .select('*')
         .gte('timestamp', cutoffDate.toISOString())
@@ -549,7 +549,7 @@ export class AnalyticsService {
     const supabase = createAdminClient()
     
     await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('ml_models')
       .upsert({
         model_name: 'trending_predictor',
@@ -622,7 +622,7 @@ export class AnalyticsService {
     
     // Get historical keyword trends
     const { data: keywordHistory } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('keyword_trends')
       .select('*')
       .gte('timestamp', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
@@ -704,7 +704,7 @@ export class AnalyticsService {
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     
     const { data: dailyViews } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('timestamp, views')
       .gte('timestamp', cutoffDate.toISOString())
@@ -748,7 +748,7 @@ export class AnalyticsService {
     const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     
     const { data: engagement } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('duration, bounce_rate, views, unique_views')
       .gte('timestamp', cutoffDate.toISOString())
@@ -775,7 +775,7 @@ export class AnalyticsService {
     const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     
     const { data: traffic } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('source, views')
       .gte('timestamp', cutoffDate.toISOString())
@@ -799,7 +799,7 @@ export class AnalyticsService {
     const cutoffDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     
     const { data: devices } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('analytics')
       .select('device, views')
       .gte('timestamp', cutoffDate.toISOString())
