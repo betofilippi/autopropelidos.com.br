@@ -133,7 +133,7 @@ export class FullSyncService {
 
       // Phase 1: Fetch and estimate total work
       const newsItems = await newsAPIService.getPortugueseNews()
-      const videosResult = await aggregateYouTubeVideos()
+      await aggregateYouTubeVideos() // For side effects only
       const videos = [] // Simplified for build compatibility
       
       job.progress.total = newsItems.length + videos.length
