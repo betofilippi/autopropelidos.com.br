@@ -3,6 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 // Types
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>
+  userChoice: Promise<{outcome: 'accepted' | 'dismissed'}>
+}
 interface DeviceInfo {
   isMobile: boolean
   isTablet: boolean
