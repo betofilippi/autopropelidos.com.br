@@ -57,8 +57,9 @@ export class DatabaseOptimizerService {
       const connectionCount = await this.getConnectionCount()
 
       // Determine overall status
-      const criticalIssues = healthChecks?.filter((check: any) => check.status === 'CRITICAL').length || 0
-      const warningIssues = healthChecks?.filter((check: any) => check.status === 'WARNING').length || 0
+      const checksArray = Array.isArray(healthChecks) ? healthChecks : []
+      const criticalIssues = checksArray.filter((check: any) => check.status === 'CRITICAL').length || 0
+      const warningIssues = checksArray.filter((check: any) => check.status === 'WARNING').length || 0
 
       const overallStatus = criticalIssues > 0 ? 'critical' : 
                            warningIssues > 0 ? 'warning' : 'healthy'
