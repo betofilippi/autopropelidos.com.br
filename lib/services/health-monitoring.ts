@@ -279,7 +279,7 @@ export class HealthMonitoringService {
       // Log to database
       const supabase = createAdminClient()
       await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('health_alerts')
         .insert({
           id: alert.id,
@@ -405,7 +405,7 @@ export class HealthMonitoringService {
     try {
       const supabase = createAdminClient()
       const { data, error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('news')
         .select('id')
         .limit(1)
@@ -695,7 +695,7 @@ export class HealthMonitoringService {
     try {
       const supabase = createAdminClient()
       const { error } = await supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('news')
         .select('id')
         .limit(1)

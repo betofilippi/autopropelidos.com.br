@@ -105,7 +105,7 @@ export class SyncService {
         try {
           // Check if news already exists by url
           const { data: existing } = await supabase
-            .schema('autopropelidos.com.br')
+            .schema('public')
             .from('news')
             .select('id, published_at')
             .eq('url', newsItem.source_url)
@@ -115,7 +115,7 @@ export class SyncService {
             // Update if the published date is different
             if (existing.published_at !== newsItem.published_at) {
               const { error } = await supabase
-                .schema('autopropelidos.com.br')
+                .schema('public')
                 .from('news')
                 .update({
                   title: newsItem.title,
@@ -137,7 +137,7 @@ export class SyncService {
           } else {
             // Insert new news item
             const { error } = await supabase
-              .schema('autopropelidos.com.br')
+              .schema('public')
               .from('news')
               .insert({
                 title: newsItem.title,
@@ -196,7 +196,7 @@ export class SyncService {
         try {
           // Check if video already exists by youtube_id
           const { data: existing } = await supabase
-            .schema('autopropelidos.com.br')
+            .schema('public')
             .from('videos')
             .select('id, view_count')
             .eq('youtube_id', video.youtube_id)
@@ -206,7 +206,7 @@ export class SyncService {
             // Update view count if different
             if (existing.view_count !== video.views) {
               const { error } = await supabase
-                .schema('autopropelidos.com.br')
+                .schema('public')
                 .from('videos')
                 .update({
                   view_count: video.views,
@@ -226,7 +226,7 @@ export class SyncService {
           } else {
             // Insert new video
             const { error } = await supabase
-              .schema('autopropelidos.com.br')
+              .schema('public')
               .from('videos')
               .insert({
                 youtube_id: video.youtube_id,
@@ -352,7 +352,7 @@ export class SyncService {
 
     // Delete old news
     const { count: newsDeleted } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('news')
       .delete()
       .lt('published_at', cutoffDate.toISOString())
@@ -360,7 +360,7 @@ export class SyncService {
 
     // Delete old videos
     const { count: videosDeleted } = await supabase
-      .schema('autopropelidos.com.br')
+      .schema('public')
       .from('videos')
       .delete()
       .lt('published_at', cutoffDate.toISOString())

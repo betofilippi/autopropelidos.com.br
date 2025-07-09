@@ -171,7 +171,7 @@ export class DatabaseOptimizerService {
     try {
       // Get before stats
       const { data: beforeStats } = await this.supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('news')
         .select('relevance_score')
         .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
@@ -185,7 +185,7 @@ export class DatabaseOptimizerService {
 
       // Get after stats
       const { data: afterStats } = await this.supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('news')
         .select('relevance_score')
         .gte('published_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
@@ -227,7 +227,7 @@ export class DatabaseOptimizerService {
 
       // Get view stats
       const { data: viewData, count } = await this.supabase
-        .schema('autopropelidos.com.br')
+        .schema('public')
         .from('mv_trending_content')
         .select('*', { count: 'exact', head: true })
 
@@ -377,21 +377,21 @@ export class DatabaseOptimizerService {
       const indexQueries = [
         // Composite indexes for common query patterns
         `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_news_category_date 
-         ON "autopropelidos.com.br".news (category, published_at DESC)`,
+         ON "public".news (category, published_at DESC)`,
         
         `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_videos_channel_date 
-         ON "autopropelidos.com.br".videos (channel_id, published_at DESC)`,
+         ON "public".videos (channel_id, published_at DESC)`,
         
         `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_analytics_content_date 
-         ON "autopropelidos.com.br".analytics (content_id, content_type, timestamp DESC)`,
+         ON "public".analytics (content_id, content_type, timestamp DESC)`,
         
         // Partial indexes for active content
         `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_news_active_high_score 
-         ON "autopropelidos.com.br".news (relevance_score DESC, published_at DESC) 
+         ON "public".news (relevance_score DESC, published_at DESC) 
          WHERE published_at > NOW() - INTERVAL '30 days' AND relevance_score > 70`,
         
         `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_videos_active_high_score 
-         ON "autopropelidos.com.br".videos (relevance_score DESC, view_count DESC) 
+         ON "public".videos (relevance_score DESC, view_count DESC) 
          WHERE published_at > NOW() - INTERVAL '30 days' AND relevance_score > 70`
       ]
 
