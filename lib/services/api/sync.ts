@@ -350,21 +350,33 @@ export class SyncService {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
 
-    // Delete old news
+    // Count old news first
     const { count: newsDeleted } = await supabase
+      .schema('public')
+      .from('news')
+      .select('id', { count: 'exact', head: true })
+      .lt('published_at', cutoffDate.toISOString())
+
+    // Delete old news
+    await supabase
       .schema('public')
       .from('news')
       .delete()
       .lt('published_at', cutoffDate.toISOString())
+
+    // Count old videos first
+    const { count: videosDeleted } = await supabase
+      .schema('public')
+      .from('videos')
       .select('id', { count: 'exact', head: true })
+      .lt('published_at', cutoffDate.toISOString())
 
     // Delete old videos
-    const { count: videosDeleted } = await supabase
+    await supabase
       .schema('public')
       .from('videos')
       .delete()
       .lt('published_at', cutoffDate.toISOString())
-      .select('id', { count: 'exact', head: true })
 
     console.log(`Cleanup completed: ${newsDeleted || 0} news items and ${videosDeleted || 0} videos deleted`)
 
