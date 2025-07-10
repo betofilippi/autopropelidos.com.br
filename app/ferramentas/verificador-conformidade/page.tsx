@@ -199,7 +199,7 @@ export default function VerificadorConformidade() {
                   <RadioGroup 
                     value={equipmentType} 
                     onValueChange={(value) => setValue('equipmentType', value)}
-                    className="grid grid-cols-2 gap-4"
+                    className="tool-radio-grid"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="electric_scooter" id="electric_scooter" />
@@ -234,7 +234,7 @@ export default function VerificadorConformidade() {
               <Separator />
 
               {/* Technical Specifications */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="tool-form-grid">
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Especificações Técnicas</h3>
                   

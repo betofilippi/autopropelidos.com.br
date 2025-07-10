@@ -43,11 +43,11 @@ export default function CalculadoraCustos() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="tool-container">
+        <div className="tool-content">
 
           {/* Information Cards */}
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="tool-grid">
             <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">

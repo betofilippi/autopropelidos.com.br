@@ -231,6 +231,40 @@
 
   /* Text Truncation - Now handled by @tailwindcss/line-clamp plugin */
 
+  /* Tool Layout Improvements */
+  .tool-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 py-12;
+  }
+
+  .tool-content {
+    @apply max-w-4xl mx-auto space-y-8;
+  }
+
+  .tool-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .tool-form-grid {
+    @apply grid md:grid-cols-2 gap-6;
+  }
+
+  .tool-form-section {
+    @apply space-y-4;
+  }
+
+  .tool-form-field {
+    @apply space-y-2;
+  }
+
+  /* Ensure proper spacing and layout */
+  .tool-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm;
+  }
+
+  .tool-radio-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+
   /* Portal Typography */
   .portal-title {
     font-weight: 700;
