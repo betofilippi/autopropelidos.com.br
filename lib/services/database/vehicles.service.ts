@@ -5,7 +5,7 @@ import { Vehicle } from '@/lib/types'
 type VehicleInsert = Omit<Vehicle, 'id' | 'created_at'>
 type VehicleUpdate = Partial<VehicleInsert>
 
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface VehicleFilters {
   category?: Vehicle['category']
@@ -43,7 +43,7 @@ export interface VehicleStatistics {
 }
 
 class VehicleService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     if (typeof window === 'undefined') {
       try {
         return createClient()

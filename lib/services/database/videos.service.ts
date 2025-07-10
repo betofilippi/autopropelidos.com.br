@@ -5,7 +5,7 @@ import { Video } from '@/lib/types'
 type VideoInsert = Omit<Video, 'id' | 'created_at'>
 type VideoUpdate = Partial<VideoInsert>
 
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface VideoFilters {
   category?: string
@@ -26,7 +26,7 @@ export interface VideoResponse {
 }
 
 class VideoService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     if (typeof window === 'undefined') {
       try {
         return createClient()

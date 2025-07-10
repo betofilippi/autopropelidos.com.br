@@ -14,7 +14,7 @@ interface User {
 type UserInsert = Omit<User, 'id' | 'created_at'>
 type UserUpdate = Partial<UserInsert>
 
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface UserPreferences {
   theme?: 'light' | 'dark' | 'system'
@@ -50,7 +50,7 @@ export interface UserResponse {
 }
 
 class UserService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     if (typeof window === 'undefined') {
       try {
         return createClient()

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { Regulation } from '@/lib/types'
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Type aliases for consistency
 type RegulationInsert = Omit<Regulation, 'id' | 'created_at'>
@@ -32,7 +32,7 @@ export interface RegulationLocation {
 }
 
 class RegulationService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     if (typeof window === 'undefined') {
       try {
         return createClient()

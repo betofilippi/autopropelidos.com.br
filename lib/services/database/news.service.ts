@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { NewsItem } from '@/lib/types'
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Type aliases for consistency
 type News = NewsItem
@@ -25,7 +25,7 @@ export interface NewsResponse {
 }
 
 class NewsService {
-  private getClient(): SupabaseClient {
+  private getClient() {
     // Use server client if available (server-side), otherwise use browser client
     if (typeof window === 'undefined') {
       try {
